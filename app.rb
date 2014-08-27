@@ -1,7 +1,12 @@
 require 'sinatra'
-require './db/db'
+require 'sinatra/json'
 
-get '/' do
-  count = DB.exec_query('select count(*) from users').fetch[0].to_i
-  "There are #{count} users in db"
+require './models/user'
+
+before do
+  content_type :json
+end
+
+get '/users.json' do
+  json count: User.count
 end
