@@ -8,5 +8,5 @@ before do
 end
 
 get '/users.json' do
-  json count: User.count
+  json User.count
 end

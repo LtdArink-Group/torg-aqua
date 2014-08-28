@@ -13,7 +13,9 @@
     <h1>Лог передачи изменений из ИС КСАЗД в ИС АКВа</h1>
   </header>
   <main ng-app="app">
-    <p>Пользователи системы: {{users.count + ' шт'}}</p>
+    <div ng-controller="UsersController as users">
+      <p>Пользователи системы: {{users.count + ' шт'}}</p>
+    </div>
     <div ng-controller="ChartController">
       <div data-ac-chart="'bar'" data-ac-data="data" data-ac-config="config" class="chart"></div>
     </div>
@@ -27,5 +29,7 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js'></script>
 <script src="/assets/angular-charts.min.js"></script>
 <script src="/assets/application.js"></script>
+<script src="/assets/chart_controller.js"></script>
+<script src="/assets/users_controller.js"></script>
 
 </html>
