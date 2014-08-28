@@ -2,7 +2,7 @@ task default: %w[test]
 
 desc "Run specs"
 task :test do
-  sh 'rspec specs'
+  sh 'rspec spec'
 end
 
 desc "Intergation iteration"
