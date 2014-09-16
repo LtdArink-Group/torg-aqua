@@ -1,8 +1,9 @@
 require 'oci8'
 
 class DB
-  def self.query(query)
-    connection.exec(query)
+  def self.exec(statement)
+    p statement
+    connection.exec(statement)
   end
 
   def self.query_value(query)
@@ -10,6 +11,6 @@ class DB
   end
 
   def self.connection
-    @connection ||= OCI8.new('ksazd2aqua', 'ksazd2aqua', 'ksazd_backup')
+    @connection ||= OCI8.new('ksazd2aqua_test', 'ksazd2aqua', 'ksazd_backup')
   end
 end
