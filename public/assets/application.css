@@ -1,12 +1,57 @@
 html, button, input, select, textarea {
-  font-family: Candara, Calibri, 'Century Gothic', Corbel, 'Segoe UI', sans-serif;
+  font-family: Candara, Calibri, Corbel, sans-serif;
   font-weight: 300;
+  font-size: 18px;
 }
 
-h1 {
-  font-weight: normal;
+body {
+  background-image: url(/assets/noisy_grid.png);
+  margin: 0;
+}
+
+body > header {
+  padding: 20px 0;
+  margin-bottom: 20px;
+  background-color: rgba(94, 165, 206,1);
+  color: white;
+}
+
+body > footer {
+  margin: 20px 0;
+}
+
+.container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+section > header {
+  font-weight: bold;
+}
+
+.block {
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid lightgray;
 }
 
 .chart {
   height: 300px;
+  width: 500px;
+}
+
+#errors {
+  width: 300px;
+  float: left;
+  margin-right: 20px;
+}
+
+#graph {
+  width: 800px;
+  float: left;
+}
+
+#details {
+  clear: both;
 }

@@ -10,18 +10,33 @@
 
 <body>
   <header>
-    <h1>Лог передачи изменений из ИС КСАЗД в ИС АКВа</h1>
+    <div class="container">
+      Лог передачи изменений из ИС КСАЗД в ИС АКВа
+    </div>
   </header>
-  <main ng-app="app">
-    <div ng-controller="UsersController as users">
-      <p>Пользователи системы: {{users.count + ' шт'}}</p>
-    </div>
-    <div ng-controller="ChartController">
-      <div data-ac-chart="'bar'" data-ac-data="data" data-ac-config="config" class="chart"></div>
-    </div>
+  <main ng-app="app" class="container">
+    <section id="errors" class="block">
+      <header>Ошибки</header>
+      <table>
+        <tr><th>Лот</th><th title="Первая попытка">Время</th><th title="Количество попыток">#</th></tr>
+        <tr><td>10.2</td><td><time>13.04.2014 15:00</time></td><td>3</td>
+      </table>
+    </section>
+    <section id="graph" class="block">
+      <header>История</header>
+      <div ng-controller="ChartController">
+        <div data-ac-chart="'bar'" data-ac-data="data" data-ac-config="config" class="chart"></div>
+      </div>
+    </section>
+    <section id="details" class="block">
+      <header>Детали</header>
+      <div ng-controller="UsersController as users">
+        <p>Пользователи системы: {{users.count + ' шт'}}</p>
+      </div>
+    </section>
   </main>
   <footer>
-    <p>(C) 2014 ОАО "РАО ЭС Востока"</p>
+    <div class="container">(C) 2014 ОАО "РАО ЭС Востока"</div>
   </footer>
 </body>
 
