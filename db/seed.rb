@@ -1,14 +1,14 @@
 require 'yaml'
 require './db/table'
 
-class Schema
+class Seed
   def initialize(file_name)
     @tables = YAML.load_file(file_name)
   end
 
-  def deploy
-    @tables.each do |name, fields|
-      Table.new(name).deploy(fields)
+  def apply
+    @tables.each do |name, values|
+      Table.new(name).apply(values)
     end
   end
 end

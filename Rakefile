@@ -19,7 +19,9 @@ namespace :db do
 
   desc 'Seed data to the database'
   task :seed do
+    require './db/seed'
     puts 'Data seed'
+    Seed.new('./db/seed.yml').apply
   end
 end
 

@@ -1,31 +1,23 @@
 comissions:
-  type: mapping
-  fields:
-    aqua_id: varchar2(10)
-    aqua_name: varchar2(100)
-    ksazd_id: number
-    ksazd_name: varchar2(100)
+  aqua_id: varchar2(10)
+  aqua_name: varchar2(100)
+  ksazd_id: number
+  ksazd_name: varchar2(100)
 departments:
-  type: mapping
-  fields:
-    aqua_id: number
-    aqua_name: varchar2(100)
-    ksazd_id: number
-    ksazd_name: varchar2(100)
+  aqua_id: number
+  aqua_name: varchar2(100)
+  ksazd_id: number
+  ksazd_name: varchar2(100)
 organizers:
-  type: mapping
-  fields:
-    aqua_id: varchar2(10)
-    aqua_department: varchar2(10)
-    aqua_name: varchar2(100)
-    ksazd_id: number
-    ksazd_name: varchar2(100)
+  aqua_id: varchar2(10)
+  aqua_department: varchar2(10)
+  aqua_name: varchar2(100)
+  ksazd_id: number
+  ksazd_name: varchar2(100)
 tender_types:
-  type: mapping
-  fields:
-    aqua_id: varchar2(10)
-    aqua_id2: varchar2(10)
-    aqua_name: varchar2(200)
-    ksazd_id: number
-    ksazd_short_name: varchar2(10)
-    ksazd_full_name: varchar2(200)
+  aqua_id: varchar2(10)
+  aqua_id2: varchar2(10)
+  aqua_name: varchar2(200)
+  ksazd_id: number
+  ksazd_short_name: varchar2(10)
+  ksazd_full_name: varchar2(200)

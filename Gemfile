@@ -4,6 +4,7 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'ruby-oci8'
 gem 'thin'
+gem 'savon'
 
 group :development do
   gem 'rake'

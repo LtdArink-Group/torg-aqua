@@ -1,20 +1,30 @@
 require './db/db'
 
 class Table
-  def initialize(name, attributes)
+  def initialize(name)
     @name = name
-    @attributes = attributes
   end
 
-  def deploy
+  def deploy(fields)
+    @fields = fields
     drop if exists?
     create
+  end
+
+  def apply(values)
+    truncate
+    values.each { |row| insert(row) }
+    DB.commit
   end
 
   private
 
   def drop 
     DB.exec "drop table #{@name}"
+  end
+
+  def truncate
+    DB.exec "truncate table #{@name}"
   end
 
   def exists?
@@ -31,6 +41,14 @@ class Table
   end
 
   def fields_list
-    @attributes['fields'].map { |name, type| "#{name} #{type}" }.join(',')
+    @fields.map { |name, type| "#{name} #{type}" }.join(',')
+  end
+
+  def insert(row)
+    DB.exec "insert into #{@name} values (#{insert_values(row)})"
+  end
+
+  def insert_values(list)
+    list.map { |v| DB.to_s(v) }.join(',')
   end
 end
