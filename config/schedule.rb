@@ -1,3 +1,5 @@
+job_type :runner, "cd :path && nice -19 bundle exec rake :task --silent :output"
+
 every 1.hour do
-  rake "test"
+  runner "test"
 end
