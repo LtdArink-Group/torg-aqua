@@ -25,8 +25,23 @@ namespace :db do
   end
 end
 
-desc 'Intergation iteration'
-task :integration do
-  require './models/user'
-  puts "Users in db: #{User.count}"
+namespace :integration do
+  desc 'Intergation iteration'
+  task :iteration do
+    require './models/user'
+    puts "Users in db: #{User.count}"
+  end
+
+  desc 'Intergation test'
+  task :test do
+    require './soap/client'
+    puts 'Getting project data from AQUA'
+    template = "%{spp_parent}\t%{spp}\t%{pspnr}\t%{name}\t%{long_name}\t%{long_text}\t" +
+               "%{mark_deleted}\t%{posid}\t%{mark_block_planning}"
+    open('projects.tsv', 'w') do |f|
+      SOAP::Client.new.data.each do |row|
+        f.puts template % row
+      end
+    end
+  end
 end
