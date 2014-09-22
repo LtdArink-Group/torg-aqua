@@ -49,6 +49,6 @@ class Table
   end
 
   def insert_values(list)
-    list.map { |v| DB.to_s(v) }.join(',')
+    list.map { |v| DB.encode(v) }.join(',')
   end
 end

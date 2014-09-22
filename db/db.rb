@@ -5,6 +5,10 @@ class DB
     exec(query).fetch[0]
   end
 
+  def self.query_first_row(query)
+    exec(query).fetch
+  end
+
   def self.exec(statement)
     log(statement) do
       connection.exec(statement)
@@ -23,11 +27,12 @@ class DB
     start = Time.now
     result = yield
     delta = (Time.now - start) * 1_000
-    puts "SQL (%.1fms) '%s'" % [delta, statement.gsub(/\s+/,' ').strip]
+    statement.gsub!(/--.*$/,'').gsub!(/\s+/,' ').strip!
+    puts "SQL (%.1fms) '%s'" % [delta, statement]
     result
   end
 
-  def self.to_s(val)
+  def self.encode(val)
     val.nil? ? 'null' : val.is_a?(String) ? "'#{val}'" : val
   end
 end
