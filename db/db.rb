@@ -27,7 +27,7 @@ class DB
     start = Time.now
     result = yield
     delta = (Time.now - start) * 1_000
-    statement.gsub!(/--.*$/,'').gsub!(/\s+/,' ').strip!
+    statement = statement.gsub(/--.*$/,'').gsub(/\s+/,' ').strip
     puts "SQL (%.1fms) '%s'" % [delta, statement]
     result
   end

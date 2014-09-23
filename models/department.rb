@@ -5,7 +5,7 @@ class Department < Model
     @values[0]
   end
 
-  private
+  # private
 
   def sql
     "select aqua_id from departments where ksazd_id = #{@id}"

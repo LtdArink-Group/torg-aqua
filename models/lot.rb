@@ -7,6 +7,10 @@ class Lot
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
   end
 
+  def to_h
+    (public_methods(false) - [:to_h]).map { |a| [a, value(a)] }.to_h
+  end
+
   def gkpz_year
     plan_lot.gkpz_year
   end
@@ -20,7 +24,21 @@ class Lot
     end
   end
 
+  def state
+    plan_lot.state == 1 ? 'P' : 'V'
+  end
+
+  def direction
+    plan_spec.direction
+  end
+
   private
+
+  def value(symbol)
+    send(symbol)
+  rescue Exception => e
+    "#{e.class}: #{e.message}"
+  end
 
   def plan_lot
     @plan_lot ||= PlanLot.find(plan_spec.lot_id)
