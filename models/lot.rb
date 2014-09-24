@@ -41,7 +41,7 @@ class Lot
   end
 
   def plan_lot
-    @plan_lot ||= PlanLot.find(plan_spec.lot_id)
+    @plan_lot ||= PlanLot.find(plan_spec.plan_lot_id)
   end
 
   def plan_spec
