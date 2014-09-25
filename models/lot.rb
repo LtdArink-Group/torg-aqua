@@ -1,6 +1,9 @@
 require './models/plan_lot'
 require './models/plan_specification'
 require './models/department'
+require './models/organizer'
+require './models/commission'
+require './models/commission_type'
 
 class Lot
   def initialize(plan_spec_id, exec_spec_id)
@@ -24,7 +27,7 @@ class Lot
     end
   end
 
-  def state
+  def state_prog
     plan_lot.state == 1 ? 'P' : 'V'
   end
 
@@ -46,6 +49,21 @@ class Lot
       (plan_lot.state == 1 ? 'P' : 'V')
   end
 
+  def status
+    1 # TODO: 2 если договор подписан
+  end
+
+  def organizer
+    ksazd_id = plan_lot.department_id
+    begin Organizer.find(ksazd_id).aqua_id rescue 'DZO' end
+  end
+
+  def commission
+    return '' unless plan_lot.commission_id
+    type_id = Commission.find(plan_lot.commission_id).commission_type_id
+    CommissionType.find(type_id).aqua_id
+  end
+
   private
 
   def value(symbol)
@@ -63,10 +81,10 @@ class Lot
   end
 
   def additional_purchase_ratio
-    lot_cost_sum / additional_purchases_cost_sum
+    main_lot_cost / additional_purchases_cost_sum
   end
 
-  def lot_cost_sum
+  def main_lot_cost_sum
     DB.query_value(<<-sql)
       select sum(s.cost_nds)
         from ksazd.plan_specifications s,
@@ -84,7 +102,7 @@ class Lot
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
           and l.additional_to = #{plan_lot.additional_to}
-          and l.additional_num >= #{plan_lot.additional_num}
+          and l.additional_num <= #{plan_lot.additional_num}
           and l.version = 0
     sql
   end

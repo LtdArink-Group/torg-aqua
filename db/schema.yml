@@ -1,4 +1,4 @@
-comissions:
+commission_types:
   aqua_id: varchar2(10)
   aqua_name: varchar2(100)
   ksazd_id: number(38)
