@@ -1,7 +1,7 @@
 require './db/model'
 
 class PlanSpecification < Model
-  attributes :plan_lot_id, :customer_id, :direction_id
+  attributes :plan_lot_id, :customer_id, :direction_id, :name
   schema :ksazd
 
   DIRECTIONS = {
