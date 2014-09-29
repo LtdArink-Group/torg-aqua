@@ -1,0 +1,6 @@
+require_relative 'ksazd/plan_lot'
+require_relative 'ksazd/plan_specification'
+require_relative 'ksazd/commission'
+require_relative 'ksazd/tender'
+require_relative 'ksazd/lot'
+require_relative 'ksazd/specification'

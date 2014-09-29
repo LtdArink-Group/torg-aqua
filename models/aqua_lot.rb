@@ -1,17 +1,21 @@
-require './models/plan_lot'
-require './models/plan_specification'
-require './models/department'
-require './models/organizer'
-require './models/commission'
-require './models/commission_type'
+require_relative 'ksazd'
+require_relative 'mapping'
 
-class Lot
+class AquaLot
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
   end
 
   def to_h
     (public_methods(false) - [:to_h]).map { |a| [a, value(a)] }.to_h
+  end
+
+  def plan_lot_id
+    plan_spec.guid.bytes.map { |b| "%02X" % b }.join()
+  end
+
+  def exec_lot_id
+    @exec_spec_id
   end
 
   def gkpz_year
@@ -64,6 +68,22 @@ class Lot
     CommissionType.find(type_id).aqua_id
   end
 
+  def tender_type_plan
+    TenderType.find(plan_lot.tender_type_id).aqua_id
+  end
+
+  def tender_type_exec
+    return '' unless @exec_spec_id
+    tender = Tender.find(exec_lots.last.tender_id)
+    TenderType.find(tender.tender_type_id).aqua_id
+  end
+
+  def tender_type_ei
+    return '' unless @exec_spec_id
+    # Заключить договор с единственным поставщиком
+    exec_lots.last.future_plan_id == 31003 ? 'EI' : ''
+  end
+
   private
 
   def value(symbol)
@@ -78,6 +98,19 @@ class Lot
 
   def plan_spec
     @plan_spec ||= PlanSpecification.find(@plan_spec_id)
+  end
+
+  def exec_lots
+    @exec_lots ||= [].tap do |lots|
+      lots << Lot.find(exec_spec.lot_id)
+      while (next_id = lots.last.next_id)
+        lots << Lot.find(next_id)
+      end
+    end
+  end
+
+  def exec_spec
+    @exec_spec ||= Specification.find(@exec_spec_id)
   end
 
   def additional_purchase_ratio
