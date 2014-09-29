@@ -2,6 +2,9 @@ require_relative 'ksazd'
 require_relative 'mapping'
 
 class AquaLot
+  EI            = 31003 # Заключить договор с единственным поставщиком
+  CONTRACT_DONE = 33100 # Договор заключен
+
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
   end
@@ -54,7 +57,7 @@ class AquaLot
   end
 
   def status
-    1 # TODO: 2 если договор подписан
+    (@exec_spec_id && exec_lots.last.status_id == CONTRACT_DONE) ? '2' : '1'
   end
 
   def organizer
@@ -80,8 +83,7 @@ class AquaLot
 
   def tender_type_ei
     return '' unless @exec_spec_id
-    # Заключить договор с единственным поставщиком
-    exec_lots.last.future_plan_id == 31003 ? 'EI' : ''
+    exec_lots.last.future_plan_id == EI ? 'EI' : ''
   end
 
   private
