@@ -56,6 +56,6 @@ class Model
   attr_reader :id
 
   def sql
-    "select #{fields} from #{table} where #{id_field} = #{id}"
+    "select #{fields} from #{table} where #{id_field} = #{DB.encode(id)}"
   end
 end

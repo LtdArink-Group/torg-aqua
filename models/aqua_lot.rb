@@ -4,6 +4,8 @@ require_relative 'mapping'
 class AquaLot
   EI            = 31003 # Заключить договор с единственным поставщиком
   CONTRACT_DONE = 33100 # Договор заключен
+  STATE_PLANNED = 1     # План (не Внеплан)
+  PURCHASE_RATIO = 0.2  # Дозакупка >< 20%
 
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
@@ -34,8 +36,8 @@ class AquaLot
     end
   end
 
-  def state_prog
-    plan_lot.state == 1 ? 'P' : 'V'
+  def program_state
+    in_plan? ? 'P' : 'V'
   end
 
   def direction
@@ -50,10 +52,10 @@ class AquaLot
     "%d.%d" % [plan_lot.num_tender, plan_lot.num_lot]
   end
 
-  def state_lot
+  def lot_state
     plan_lot.additional_to ?
-      (plan_lot.state == 1 ? 'D3' : (additional_purchase_ratio < 0.2 ? 'D1' : 'D2')) :
-      (plan_lot.state == 1 ? 'P' : 'V')
+      (in_plan? ? 'D3' : (additional_purchase_ratio < PURCHASE_RATIO ? 'D1' : 'D2')) :
+      (in_plan? ? 'P' : 'V')
   end
 
   def status
@@ -86,6 +88,19 @@ class AquaLot
     exec_lots.last.future_plan_id == EI ? 'EI' : ''
   end
 
+  def cost_nds
+    plan_spec.cost_nds.to_s('F')
+  end
+
+  def cost
+    plan_spec.cost.to_s('F')
+  end
+
+  def cost_doc
+    ksazd_name = plan_spec.cost_doc
+    begin CostDocument.find(ksazd_name).aqua_id rescue '' end
+  end
+
   private
 
   def value(symbol)
@@ -113,6 +128,11 @@ class AquaLot
 
   def exec_spec
     @exec_spec ||= Specification.find(@exec_spec_id)
+  end
+
+  def in_plan?
+    return @in_plan if defined? @in_plan
+    @in_plan = (plan_lot.state == STATE_PLANNED)
   end
 
   def additional_purchase_ratio
