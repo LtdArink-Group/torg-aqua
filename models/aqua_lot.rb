@@ -12,22 +12,26 @@ class AquaLot
   end
 
   def to_h
-    (public_methods(false) - [:to_h]).map { |a| [a, value(a)] }.to_h
+    (public_methods(false) - [:to_h]).map { |a| [a.to_s.upcase, value(a)] }.to_h
   end
 
-  def plan_lot_id
+  # Номер лота из КСАЗД (планирование)
+  def znumksazdp
     plan_spec.guid.bytes.map { |b| "%02X" % b }.join()
   end
 
-  def exec_lot_id
+  #Номер лота из КСАЗД (исполнение)
+  def znumksazdf
     @exec_spec_id
   end
 
-  def gkpz_year
+  # Финансовый год 
+  def gjahr
     plan_lot.gkpz_year
   end
 
-  def department
+  # Орг.единица
+  def zzcustomer_id
     ksazd_id = plan_spec.customer_id
     begin
       Department.find(ksazd_id).aqua_id
@@ -36,67 +40,81 @@ class AquaLot
     end
   end
 
-  def program_state
+  # Идентификатор (Состояние в ГКПЗ: План / Внеплан)
+  def object_type
     in_plan? ? 'P' : 'V'
   end
 
-  def direction
+  # Раздел ГКПЗ 
+  def funbud
     plan_spec.direction
   end
 
-  def name
+  # Название лота
+  def lname
     plan_spec.name
   end
 
-  def number
+  # Номер лота
+  def lnum
     "%d.%d" % [plan_lot.num_tender, plan_lot.num_lot]
   end
 
-  def lot_state
+  # Закупка плановая/внеплановая (+ дозакупка)
+  def lplvp
     plan_lot.additional_to ?
       (in_plan? ? 'D3' : (additional_purchase_ratio < PURCHASE_RATIO ? 'D1' : 'D2')) :
       (in_plan? ? 'P' : 'V')
   end
 
-  def status
+  # Статус лота
+  def lotstatus
     (@exec_spec_id && exec_lots.last.status_id == CONTRACT_DONE) ? '2' : '1'
   end
 
-  def organizer
+  # Организатор процедуры
+  def org
     ksazd_id = plan_lot.department_id
     begin Organizer.find(ksazd_id).aqua_id rescue 'DZO' end
   end
 
-  def commission
+  # Закупочная комиссия
+  def zk
     return '' unless plan_lot.commission_id
     type_id = Commission.find(plan_lot.commission_id).commission_type_id
     CommissionType.find(type_id).aqua_id
   end
 
-  def tender_type_plan
+  # Способ закупки (план)
+  def spzkp
     TenderType.find(plan_lot.tender_type_id).aqua_id
   end
 
-  def tender_type_exec
+  # Способ закупки (по способу объявления)
+  def spzkf
     return '' unless @exec_spec_id
     tender = Tender.find(exec_lots.last.tender_id)
     TenderType.find(tender.tender_type_id).aqua_id
   end
 
-  def tender_type_ei
+  # Способ закупки (ЕИ по итогам конкурентных процедур)
+  def spzei
     return '' unless @exec_spec_id
     exec_lots.last.future_plan_id == EI ? 'EI' : ''
   end
 
-  def cost_nds
+  # Планируемая цена лота (руб. с НДС)
+  def sumn
     plan_spec.cost_nds.to_s('F')
   end
 
-  def cost
+  # Планируемая цена лота (руб. без  НДС)
+  def sum_
     plan_spec.cost.to_s('F')
   end
 
-  def cost_doc
+  # Документ, на основании которого определена планируемая цена
+  def doctype
     ksazd_name = plan_spec.cost_doc
     begin CostDocument.find(ksazd_name).aqua_id rescue '' end
   end
