@@ -69,7 +69,7 @@ class AquaLot
 
   # Статус лота
   def lotstatus
-    (@exec_spec_id && exec_lots.last.status_id == CONTRACT_DONE) ? '2' : '1'
+    (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ? '2' : '1'
   end
 
   # Организатор процедуры
@@ -80,7 +80,7 @@ class AquaLot
 
   # Закупочная комиссия
   def zk
-    return '' unless plan_lot.commission_id
+    return nil unless plan_lot.commission_id
     type_id = Commission.find(plan_lot.commission_id).commission_type_id
     CommissionType.find(type_id).aqua_id
   end
@@ -92,15 +92,13 @@ class AquaLot
 
   # Способ закупки (по способу объявления)
   def spzkf
-    return '' unless @exec_spec_id
-    tender = Tender.find(exec_lots.last.tender_id)
-    TenderType.find(tender.tender_type_id).aqua_id
+    begin TenderType.find(last_tender.tender_type_id).aqua_id rescue nil end
   end
 
   # Способ закупки (ЕИ по итогам конкурентных процедур)
   def spzei
     return '' unless @exec_spec_id
-    exec_lots.last.future_plan_id == EI ? 'EI' : ''
+    last_lot.future_plan_id == EI ? 'EI' : nil
   end
 
   # Планируемая цена лота (руб. с НДС)
@@ -116,7 +114,27 @@ class AquaLot
   # Документ, на основании которого определена планируемая цена
   def doctype
     ksazd_name = plan_spec.cost_doc
-    begin CostDocument.find(ksazd_name).aqua_id rescue '' end
+    begin CostDocument.find(ksazd_name).aqua_id rescue nil end
+  end
+
+  # Дата объявления конкурсных процедур. План
+  def datepk
+    format_date(plan_lot.announce_date)
+  end
+
+  # Дата вскрытия конвертов. План
+  def datepv
+    format_date(last_tender.bid_date)
+  end
+
+  # Дата подведения итогов конкурса. План
+  def datepi
+    format_date(last_tender.summary_date)
+  end
+
+  # Дата заключения договора с победителем конкурса. План
+  def datepd
+    format_date(nil)
   end
 
   private
@@ -178,5 +196,19 @@ class AquaLot
           and l.additional_num <= #{plan_lot.additional_num}
           and l.version = 0
     sql
+  end
+
+  def last_lot
+    return NullLot.new unless @exec_spec_id
+    @last_lot ||= exec_lots.last
+  end
+
+  def last_tender
+    return NullTender.new unless @exec_spec_id
+    @last_tender ||= Tender.find(last_lot.tender_id)
+  end
+
+  def format_date(date)
+    date.strftime '%d.%m.%Y' if date
   end
 end
