@@ -1,4 +1,4 @@
-require './db/model'
+require 'db/model'
 
 class PlanSpecification < Model
   attributes :guid, :plan_lot_id, :customer_id, :direction_id, :name,

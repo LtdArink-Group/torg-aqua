@@ -1,4 +1,4 @@
-require './db/db'
+require 'db/db'
 
 class Model
   class << self
@@ -18,7 +18,8 @@ class Model
     end
 
     def find(id)
-      self.new(id).tap { |s| s.load }
+      model = self.new(id).tap { |s| s.load }
+      model.values ? model : nil
     end
   end
 
@@ -29,6 +30,8 @@ class Model
   def load
     @values = DB.query_first_row(sql)
   end
+
+  attr_reader :values
 
   private
 

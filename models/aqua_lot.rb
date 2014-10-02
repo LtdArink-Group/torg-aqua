@@ -1,11 +1,11 @@
-require_relative 'ksazd'
-require_relative 'mapping'
+require 'models/ksazd'
+require 'models/mapping'
 
 class AquaLot
   EI            = 31003 # Заключить договор с единственным поставщиком
   CONTRACT_DONE = 33100 # Договор заключен
   STATE_PLANNED = 1     # План (не Внеплан)
-  PURCHASE_RATIO = 0.2  # Дозакупка >< 20%
+  ADDITIONAL_RATIO = 0.2 # Дозакупка >< 20%
 
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
@@ -22,7 +22,7 @@ class AquaLot
       # Орг.единица
       'ZZCUSTOMER_ID' => customer,
       # Идентификатор (Состояние в ГКПЗ: План / Внеплан)
-      'OBJECT_TYPE' => in_plan? ? 'P' : 'V',
+      'OBJECT_TYPE' => lot_state,
       # Раздел ГКПЗ 
       'FUNBUD' => plan_spec.direction,
       # Название лота
@@ -30,17 +30,17 @@ class AquaLot
       # Номер лота
       'LNUM' => "%d.%d" % [plan_lot.num_tender, plan_lot.num_lot],
       # Закупка плановая/внеплановая (+ дозакупка)
-      'LPLVP' => lplvp,
+      'LPLVP' => plan_lot.additional_to ? additional_state : lot_state,
       # Статус лота
       'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ? '2' : '1',
       # Организатор процедуры
-      'ORG' => organizer,
+      'ORG' => Organizer.lookup(plan_lot.department_id) || 'DZO',
       # Закупочная комиссия
       'ZK' => comission,
       # Способ закупки (план)
-      'SPZKP' => TenderType.find(plan_lot.tender_type_id).aqua_id,
+      'SPZKP' => TenderType.lookup(plan_lot.tender_type_id),
       # Способ закупки (по способу объявления)
-      'SPZKF' => begin TenderType.find(last_tender.tender_type_id).aqua_id rescue nil end,
+      'SPZKF' => TenderType.lookup(last_tender.tender_type_id),
       # Способ закупки (ЕИ по итогам конкурентных процедур)
       'SPZEI' => last_lot.future_plan_id == EI ? 'EI' : nil,
       # Планируемая цена лота (руб. с НДС)
@@ -48,7 +48,7 @@ class AquaLot
       # Планируемая цена лота (руб. без  НДС)
       'SUM_' => plan_spec.cost.to_s('F'),
       # Документ, на основании которого определена планируемая цена
-      'DOCTYPE' => cost_document,
+      'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
       'DATEPK' => format_date(plan_lot.announce_date),
       # Дата вскрытия конвертов. План
@@ -56,7 +56,11 @@ class AquaLot
       # Дата подведения итогов конкурса. План
       'DATEPI' => format_date(last_tender.summary_date),
       # Дата заключения договора с победителем конкурса. План
-      'DATEPD' => format_date(nil)
+      'DATEPD' => format_date(nil),
+      # Дата объявления конкурсных процедур. Факт
+      'DATEFK' => format_date(last_tender.announce_date),
+      # Дата вскрытия конвертов. Факт
+      'DATEFV' => format_date(open_protocol.open_date)
     }
   end
 
@@ -66,41 +70,16 @@ class AquaLot
 
   def customer
     ksazd_id = plan_spec.customer_id
-    begin
-      Department.find(ksazd_id).aqua_id
-    rescue
-      raise "Не удалось найти заказчика АКВА для id: #{ksazd_id}"
-    end
-  end
-
-  def lplvp
-    plan_lot.additional_to ?
-      (in_plan? ? 'D3' : (additional_purchase_ratio < PURCHASE_RATIO ? 'D1' : 'D2')) :
-      (in_plan? ? 'P' : 'V')
-  end
-
-  def organizer
-    ksazd_id = plan_lot.department_id
-    begin Organizer.find(ksazd_id).aqua_id rescue 'DZO' end
+    Department.lookup(ksazd_id) ||
+      begin raise "Не удалось найти заказчика АКВА для id: #{ksazd_id}" end
   end
 
   def comission
     if plan_lot.commission_id
       type_id = Commission.find(plan_lot.commission_id).commission_type_id
-      CommissionType.find(type_id).aqua_id
+      CommissionType.lookup(type_id)
     end
   end
-
-  def cost_document
-    ksazd_name = plan_spec.cost_doc
-    begin CostDocument.find(ksazd_name).aqua_id rescue nil end
-  end
-
-  # def value(symbol)
-  #   send(symbol)
-  # rescue Exception => e
-  #   "%s: %s" % [e.class, e.message]
-  # end
 
   # entities --------------------------------------------------------
 
@@ -110,11 +89,6 @@ class AquaLot
 
   def plan_spec
     @plan_spec ||= PlanSpecification.find(@plan_spec_id)
-  end
-
-  def in_plan?
-    return @in_plan if defined? @in_plan
-    @in_plan = (plan_lot.state == STATE_PLANNED)
   end
 
   def exec_spec
@@ -140,15 +114,37 @@ class AquaLot
     @last_tender ||= Tender.find(last_lot.tender_id)
   end
 
-  # helpers ---------------------------------------------------------
-
-  def additional_purchase_ratio
-    main_lot_cost / additional_purchases_cost_sum
+  def open_protocol
+    return NullOpenProtocol.new unless @exec_spec_id
+    OpenProtocol.find(last_lot.tender_id)
   end
 
-  def main_lot_cost_sum
+  # helpers ---------------------------------------------------------
+
+  def in_plan?
+    return @in_plan if defined? @in_plan
+    @in_plan = (plan_lot.state == STATE_PLANNED)
+  end
+
+  def lot_state
+    in_plan? ? 'P' : 'V'
+  end
+
+  def additional_state
+    if in_plan?
+      'D3'
+    else
+      additional_ratio < ADDITIONAL_RATIO ? 'D1' : 'D2'
+    end
+  end
+
+  def additional_ratio
+    main_lot_cost / additional_cost_sum
+  end
+
+  def main_lot_cost
     DB.query_value(<<-sql)
-      select sum(s.cost_nds)
+      select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
@@ -157,9 +153,9 @@ class AquaLot
     sql
   end
 
-  def additional_purchases_cost_sum
+  def additional_cost_sum
     DB.query_value(<<-sql)
-      select sum(s.cost_nds)
+      select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
         where s.plan_lot_id = l.id

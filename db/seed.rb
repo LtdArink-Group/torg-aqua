@@ -1,5 +1,5 @@
 require 'yaml'
-require './db/table'
+require 'db/table'
 
 class Seed
   def initialize(file_name)

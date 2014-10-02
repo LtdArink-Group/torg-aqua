@@ -1,4 +1,4 @@
-require './db/db'
+require 'db/db'
 
 class Table
   def initialize(name)

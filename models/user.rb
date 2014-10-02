@@ -1,4 +1,4 @@
-require './db/db'
+require 'db/db'
 
 class User
   def self.count

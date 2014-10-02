@@ -1,7 +1,8 @@
 require 'sinatra'
 require 'sinatra/json'
 
-require './models/user'
+$LOAD_PATH << '.'
+require 'models/user'
 
 before do
   content_type :json
