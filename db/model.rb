@@ -17,6 +17,10 @@ class Model
       @id_field = symbol.to_s
     end
 
+    def where(hash)
+      @where = hash
+    end
+
     def find(id)
       model = self.new(id).tap { |s| s.load }
       model.values ? model : nil
@@ -36,12 +40,15 @@ class Model
   private
 
   def fields
-    @fields ||= self.class.instance_variable_get(:@attributes).join(', ')
+    self.class.instance_variable_get(:@attributes).join(', ')
   end
 
   def schema
-    @schema ||= self.class.instance_variables.include?(:@schema) ?
-                self.class.instance_variable_get(:@schema) + '.' : ''
+    if self.class.instance_variables.include?(:@schema)
+      self.class.instance_variable_get(:@schema) + '.'
+    else
+      ''
+    end
   end
 
   def table_name
@@ -49,16 +56,24 @@ class Model
   end
 
   def table
-    @table ||= schema + table_name
+    schema + table_name
   end
 
   def id_field
-    @id_field ||= self.class.instance_variable_get(:@id_field) || 'id'
+    self.class.instance_variable_get(:@id_field) || 'id'
   end
 
-  attr_reader :id
+  def additional_conditions
+    if self.class.instance_variables.include?(:@where)
+      self.class.instance_variable_get(:@where).map do |field, value|
+        " and #{field} = #{DB.encode(value)}"
+      end.join
+    end
+  end
 
   def sql
-    "select #{fields} from #{table} where #{id_field} = #{DB.encode(id)}"
+    "select #{fields} from #{table} " \
+    "where #{id_field} = #{DB.encode(@id)}" \
+    "#{additional_conditions}"
   end
 end

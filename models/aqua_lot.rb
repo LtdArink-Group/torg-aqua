@@ -6,6 +6,12 @@ class AquaLot
   CONTRACT_DONE = 33100 # Договор заключен
   STATE_PLANNED = 1     # План (не Внеплан)
   ADDITIONAL_RATIO = 0.2 # Дозакупка >< 20%
+  DIRECTIONS = {
+    21002 => 'ТПИР',
+    21003 => 'КС',
+    21007 => 'НИОКР',
+    21011 => 'ИТ'
+  }
 
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
@@ -14,7 +20,7 @@ class AquaLot
   def to_h
     {
       # Номер лота из КСАЗД (планирование)
-      'ZNUMKSAZDP' => plan_spec.guid.bytes.map { |b| "%02X" % b }.join(),
+      'ZNUMKSAZDP' => format_guid(plan_spec.guid),
       #Номер лота из КСАЗД (исполнение)
       'ZNUMKSAZDF' => @exec_spec_id,
       # Финансовый год
@@ -24,7 +30,7 @@ class AquaLot
       # Идентификатор (Состояние в ГКПЗ: План / Внеплан)
       'OBJECT_TYPE' => lot_state,
       # Раздел ГКПЗ 
-      'FUNBUD' => plan_spec.direction,
+      'FUNBUD' => DIRECTIONS[plan_spec.direction_id],
       # Название лота
       'LNAME' => plan_spec.name,
       # Номер лота
@@ -44,9 +50,9 @@ class AquaLot
       # Способ закупки (ЕИ по итогам конкурентных процедур)
       'SPZEI' => last_lot.future_plan_id == EI ? 'EI' : nil,
       # Планируемая цена лота (руб. с НДС)
-      'SUMN' => plan_spec.cost_nds.to_s('F'),
+      'SUMN' => (plan_spec.cost_nds * plan_spec.qty).to_s('F'),
       # Планируемая цена лота (руб. без  НДС)
-      'SUM_' => plan_spec.cost.to_s('F'),
+      'SUM_' => (plan_spec.cost * plan_spec.qty).to_s('F'),
       # Документ, на основании которого определена планируемая цена
       'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
@@ -60,7 +66,13 @@ class AquaLot
       # Дата объявления конкурсных процедур. Факт
       'DATEFK' => format_date(last_tender.announce_date),
       # Дата вскрытия конвертов. Факт
-      'DATEFV' => format_date(open_protocol.open_date)
+      'DATEFV' => format_date(open_protocol.open_date),
+      # Дата подведения итогов конкурса. Факт
+      'DATEFI' => format_date(winner_protocol.confirm_date),
+      # Дата заключения договора с победителем конкурса. Факт
+      'DATEFD' => format_date(contract.confirm_date),
+      # Ссылка на лот по дозакупке
+      'SSLOT' => format_guid(additional_to)
     }
   end
 
@@ -116,7 +128,17 @@ class AquaLot
 
   def open_protocol
     return NullOpenProtocol.new unless @exec_spec_id
-    OpenProtocol.find(last_lot.tender_id)
+    OpenProtocol.find(last_lot.tender_id) || NullOpenProtocol.new
+  end
+
+  def winner_protocol
+    return NullContract.new unless @exec_spec_id
+    Contract.find(last_lot.winner_protocol_id) || NullContract.new
+  end
+
+  def contract
+    return NullWinnerProtocol.new unless @exec_spec_id
+    WinnerProtocol.find(last_lot.id) || NullWinnerProtocol.new
   end
 
   # helpers ---------------------------------------------------------
@@ -165,7 +187,21 @@ class AquaLot
     sql
   end
 
+  def additional_to
+    return nil unless plan_lot.additional_to
+    DB.query_value(<<-sql)
+      select distinct s.guid
+        from ksazd.plan_specifications s
+        where s.direction_id = #{plan_spec.direction_id}
+          and s.plan_lot_id = #{plan_spec.plan_lot_id}
+    sql
+  end
+
   def format_date(date)
     date.strftime '%d.%m.%Y' if date
+  end
+
+  def format_guid(guid)
+    guid.bytes.map { |b| "%02X" % b }.join if guid
   end
 end
