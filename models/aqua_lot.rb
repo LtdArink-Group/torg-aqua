@@ -83,7 +83,9 @@ class AquaLot
       # Куратор
       'KURATOR' => plan_spec.curator,
       # Технический куратор
-      'TKURATOR' => plan_spec.tech_curator
+      'TKURATOR' => plan_spec.tech_curator,
+      # Подраздел ГКПЗ
+      'LOT_FUNBUD' => Subdirection.lookup(plan_spec.direction_id, plan_lot.subject_type_id)
     }
   end
 

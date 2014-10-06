@@ -14,21 +14,25 @@ class Model
     end
 
     def id_field(symbol)
-      @id_field = symbol.to_s
+      @id_fields = [symbol.to_s]
+    end
+
+    def id_fields(*symbols)
+      @id_fields = symbols.map(&:to_s)
     end
 
     def where(hash)
       @where = hash
     end
 
-    def find(id)
-      model = self.new(id).tap { |s| s.load }
+    def find(*ids)
+      model = self.new(*ids).tap { |s| s.load }
       model.values ? model : nil
     end
   end
 
-  def initialize(id)
-    @id = id
+  def initialize(*ids)
+    @ids = ids
   end
 
   def load
@@ -63,8 +67,14 @@ class Model
     schema + table_name + table_suffix
   end
 
-  def id_field
-    self.class.instance_variable_get(:@id_field) || 'id'
+  def id_fields
+    self.class.instance_variable_get(:@id_fields) || ['id']
+  end
+
+  def id_conditions
+    id_fields.each_with_index.map do |id, i|
+      "#{id} = #{DB.encode(@ids[i])}"
+    end.join(' and ')
   end
 
   def additional_conditions
@@ -77,7 +87,6 @@ class Model
 
   def sql
     "select #{fields} from #{table} " \
-    "where #{id_field} = #{DB.encode(@id)}" \
-    "#{additional_conditions}"
+    "where #{id_conditions}#{additional_conditions}"
   end
 end

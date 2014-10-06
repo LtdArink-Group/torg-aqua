@@ -38,3 +38,8 @@ monitor_services:
   aqua_name: varchar2(200)
   ksazd_id: number(38)
   ksazd_name: varchar2(200)
+subdirections:
+  aqua_name: varchar2(20)
+  ksazd_direction_id: number(38)
+  ksazd_subject_type_id: number(38)
+  aqua_description: varchar2(200)
