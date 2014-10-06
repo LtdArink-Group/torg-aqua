@@ -94,7 +94,17 @@ class AquaLot
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
-      'ZEI' => plan_spec.qty
+      'ZEI' => plan_spec.qty,
+      # ОКЕИ
+      'OKEI' => plan_spec.unit_id,
+      # ОКАТО
+      'OKATO' => okato,
+      # Код по ОКВЭД
+      'ZOKVED' => plan_spec.okved_id,
+      # Код по ОКДП
+      'ZOKDP' => plan_spec.okdp_id,
+      # Мин. необходимые требования, предъявляемые к закупаеой продукции
+      'ZMTREB' => plan_spec.requirements
     }
   end
 
@@ -220,6 +230,18 @@ class AquaLot
         from ksazd.plan_specifications s
         where s.direction_id = #{plan_spec.direction_id}
           and s.plan_lot_id = #{plan_spec.plan_lot_id}
+    sql
+  end
+
+  def okato
+    DB.query_value(<<-sql)
+      select coalesce(h.okato, a.okato)
+        from ksazd.fias_plan_specifications s,
+             ksazd.fias_houses h,
+             ksazd.fias_addrs a
+        where s.houseid = h.houseid(+)
+          and s.addr_aoid = a.aoid
+          and s.plan_specification_id = #{@plan_spec_id}
     sql
   end
 
