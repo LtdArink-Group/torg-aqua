@@ -52,11 +52,15 @@ class Model
   end
 
   def table_name
-    self.class.to_s.scan(/[A-Z][a-z]+/).map(&:downcase).join('_') + 's'
+    @table_name ||= self.class.to_s.scan(/[A-Z][a-z]+/).map(&:downcase).join('_')
+  end
+
+  def table_suffix
+    %w{s x}.include?(table_name[-1]) ? 'es' : 's'
   end
 
   def table
-    schema + table_name
+    schema + table_name + table_suffix
   end
 
   def id_field

@@ -1,3 +1,7 @@
+directions:
+  aqua_name: varchar2(10)
+  ksazd_id: number(38)
+  ksazd_name: varchar2(100)
 commission_types:
   aqua_id: varchar2(10)
   aqua_name: varchar2(100)
@@ -24,4 +28,13 @@ tender_types:
 cost_documents:
   aqua_id: number(38)
   aqua_name: varchar2(200)
+  ksazd_name: varchar2(200)
+etp_addresses:
+  aqua_id: char(1)
+  ksazd_id: number(38)
+  ksazd_name: varchar2(100)
+monitor_services:
+  aqua_id: number(38)
+  aqua_name: varchar2(200)
+  ksazd_id: number(38)
   ksazd_name: varchar2(200)

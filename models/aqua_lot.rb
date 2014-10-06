@@ -2,16 +2,11 @@ require 'models/ksazd'
 require 'models/mapping'
 
 class AquaLot
-  EI            = 31003 # Заключить договор с единственным поставщиком
-  CONTRACT_DONE = 33100 # Договор заключен
-  STATE_PLANNED = 1     # План (не Внеплан)
-  ADDITIONAL_RATIO = 0.2 # Дозакупка >< 20%
-  DIRECTIONS = {
-    21002 => 'ТПИР',
-    21003 => 'КС',
-    21007 => 'НИОКР',
-    21011 => 'ИТ'
-  }
+  EI               = 31003 # Заключить договор с единственным поставщиком
+  CONTRACT_DONE    = 33100 # Договор заключен
+  STATE_PLANNED    = 1     # План (не Внеплан)
+  ADDITIONAL_RATIO = 0.2   # Дозакупка >< 20%
+  INVESTMENTS      = 1     # Инвестиционные средства
 
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
@@ -30,7 +25,7 @@ class AquaLot
       # Идентификатор (Состояние в ГКПЗ: План / Внеплан)
       'OBJECT_TYPE' => lot_state,
       # Раздел ГКПЗ 
-      'FUNBUD' => DIRECTIONS[plan_spec.direction_id],
+      'FUNBUD' => Direction.lookup(plan_spec.direction_id),
       # Название лота
       'LNAME' => plan_spec.name,
       # Номер лота
@@ -38,7 +33,7 @@ class AquaLot
       # Закупка плановая/внеплановая (+ дозакупка)
       'LPLVP' => plan_lot.additional_to ? additional_state : lot_state,
       # Статус лота
-      'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ? '2' : '1',
+      'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ? 2 : 1,
       # Организатор процедуры
       'ORG' => Organizer.lookup(plan_lot.department_id) || 'DZO',
       # Закупочная комиссия
@@ -72,7 +67,23 @@ class AquaLot
       # Дата заключения договора с победителем конкурса. Факт
       'DATEFD' => format_date(contract.confirm_date),
       # Ссылка на лот по дозакупке
-      'SSLOT' => format_guid(additional_to)
+      'SSLOT' => format_guid(additional_to),
+      # Источник финансирования
+      'FIN_GROUP' => INVESTMENTS,
+      # Использование электронной торговой площадки b2b.enegro План
+      'B2BP' => EtpAddress.lookup(plan_lot.etp_address_id),
+      # Использование электронной торговой площадки b2b.enegro План
+      'B2BF' => EtpAddress.lookup(last_tender.etp_address_id),
+      # Подразделение - куратор закупки
+      'ZKURATOR' => MonitorService.lookup(plan_spec.monitor_service_id),
+      # Дата начала поставки товаров, выполнения работ, услуг
+      'DATENP' => format_date(plan_spec.delivery_date_begin),
+      # Дата окончания поставки товаров, выполнения работ, услуг
+      'DATEOP' => format_date(plan_spec.delivery_date_end),
+      # Куратор
+      'KURATOR' => plan_spec.curator,
+      # Технический куратор
+      'TKURATOR' => plan_spec.tech_curator
     }
   end
 

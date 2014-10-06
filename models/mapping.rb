@@ -1,5 +1,8 @@
+require_relative 'mapping/direction'
 require_relative 'mapping/department'
 require_relative 'mapping/organizer'
 require_relative 'mapping/commission_type'
 require_relative 'mapping/tender_type'
 require_relative 'mapping/cost_document'
+require_relative 'mapping/etp_address'
+require_relative 'mapping/monitor_service'
