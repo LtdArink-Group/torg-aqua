@@ -45,9 +45,9 @@ class AquaLot
       # Способ закупки (ЕИ по итогам конкурентных процедур)
       'SPZEI' => last_lot.future_plan_id == EI ? 'EI' : nil,
       # Планируемая цена лота (руб. с НДС)
-      'SUMN' => (plan_spec.cost_nds * plan_spec.qty).to_s('F'),
+      'SUMN' => plan_spec.cost_nds.to_s('F'),
       # Планируемая цена лота (руб. без  НДС)
-      'SUM_' => (plan_spec.cost * plan_spec.qty).to_s('F'),
+      'SUM_' => plan_spec.cost.to_s('F'),
       # Документ, на основании которого определена планируемая цена
       'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
@@ -85,7 +85,16 @@ class AquaLot
       # Технический куратор
       'TKURATOR' => plan_spec.tech_curator,
       # Подраздел ГКПЗ
-      'LOT_FUNBUD' => Subdirection.lookup(plan_spec.direction_id, plan_lot.subject_type_id)
+      'LOT_FUNBUD' => Subdirection.lookup(plan_spec.direction_id,
+                                          plan_lot.subject_type_id),
+      # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
+      'P_REASON' => plan_lot.tender_type_explanations,
+      # Обоснование (документ)
+      'P_REASON_DOC' => plan_lot.explanations_doc,
+      # Пункт положения
+      'P_PARAGRAPH' => paragraph,
+      # Количество
+      'ZEI' => plan_spec.qty
     }
   end
 
@@ -104,6 +113,10 @@ class AquaLot
       type_id = Commission.find(plan_lot.commission_id).commission_type_id
       CommissionType.lookup(type_id)
     end
+  end
+
+  def paragraph
+    "00#{num}" if num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
   end
 
   # entities --------------------------------------------------------
