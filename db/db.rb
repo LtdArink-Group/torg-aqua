@@ -9,9 +9,9 @@ class DB
     exec(query).fetch
   end
 
-  def self.exec(statement)
+  def self.exec(statement, &block)
     log(statement) do
-      connection.exec(statement)
+      connection.exec(statement, &block)
     end
   end
 

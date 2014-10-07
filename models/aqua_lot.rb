@@ -12,7 +12,7 @@ class AquaLot
   STATE_UNPLAN          = 'V'  # Внеплановая закупка
   STATE_ADD_PLAN        = 'D3' # Плановая дозакупка
   STATE_ADD_UNPLAN_LESS = 'D1' # Внеплановая дозакупка менее 20%
-  STATE_APP_UNPLAN_MORE = 'D2' # Внеплановая дозакупка более 20%
+  STATE_ADD_UNPLAN_MORE = 'D2' # Внеплановая дозакупка более 20%
   IN_PROGRESS      = 1     # В работе
   TENDER_COMPLETED = 2     # Закупка проведена
   AQUA_DZO         = 'DZO' # Организатор процедуры (по умолчанию)
@@ -129,8 +129,25 @@ class AquaLot
       # Код валюты
       'WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
-      'ZNUMPR' => last_tender.etp_num
-      # Планируемый объем обязательств
+      'ZNUMPR' => last_tender.etp_num,
+      # Планируемый объем обязательств (финансирование с НДС)
+      'FINSN5Y1' => format_cost(plan_spec_amounts[0][0]),
+      'FINSN5Y2' => format_cost(plan_spec_amounts[1][0]),
+      'FINSN5Y3' => format_cost(plan_spec_amounts[2][0]),
+      'FINSN5Y4' => format_cost(plan_spec_amounts[3][0]),
+      'FINSN5Y5' => format_cost(plan_spec_amounts[4][0]),
+      # Планируемая сумма освоения (без НДС)
+      'ODVBN5Y1' => format_cost(plan_spec_amounts[0][1]),
+      'ODVBN5Y2' => format_cost(plan_spec_amounts[1][1]),
+      'ODVBN5Y3' => format_cost(plan_spec_amounts[2][1]),
+      'ODVBN5Y4' => format_cost(plan_spec_amounts[3][1]),
+      'ODVBN5Y5' => format_cost(plan_spec_amounts[4][1]),
+      # Планируемая сумма освоения (с НДС)
+      'ODVSN5Y1' => format_cost(plan_spec_amounts[0][2]),
+      'ODVSN5Y2' => format_cost(plan_spec_amounts[1][2]),
+      'ODVSN5Y3' => format_cost(plan_spec_amounts[2][2]),
+      'ODVSN5Y4' => format_cost(plan_spec_amounts[3][2]),
+      'ODVSN5Y5' => format_cost(plan_spec_amounts[4][2])
     }
   end
 
@@ -231,11 +248,19 @@ class AquaLot
 
   def additional_unplan_state
     additional_ratio < ADDITIONAL_RATIO ?
-      STATE_ADD_UNPLAN_LESS : STATE_APP_UNPLAN_MORE
+      STATE_ADD_UNPLAN_LESS : STATE_ADD_UNPLAN_MORE
   end
 
   def additional_ratio
     main_lot_cost / additional_cost_sum
+  end
+
+  def plan_spec_amounts
+    @plan_spec_amounts ||= [].tap do |a|
+      plan_spec_amounts_query { |r| p r; a << r }
+      zero = BigDecimal.new("0")
+      (5 - a.size).times { a << [zero, zero, zero] }
+    end
   end
 
   def format_date(date)
@@ -294,6 +319,15 @@ class AquaLot
         where s.houseid = h.houseid(+)
           and s.addr_aoid = a.aoid
           and s.plan_specification_id = #{@plan_spec_id}
+    sql
+  end
+
+  def plan_spec_amounts_query(&block)
+    DB.exec(<<-sql, &block)
+      select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
+        from ksazd.plan_spec_amounts a
+        where a.plan_specification_id = #{@plan_spec_id}
+        order by a.year
     sql
   end
 end
