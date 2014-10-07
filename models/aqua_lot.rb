@@ -2,11 +2,24 @@ require 'models/ksazd'
 require 'models/mapping'
 
 class AquaLot
-  EI               = 31003 # Заключить договор с единственным поставщиком
+  # ИС КСАЗД
+  FUTURE_PLAN_EI   = 31003 # Заключить договор с единственным поставщиком
   CONTRACT_DONE    = 33100 # Договор заключен
   STATE_PLANNED    = 1     # План (не Внеплан)
   ADDITIONAL_RATIO = 0.2   # Дозакупка >< 20%
+  # ИС АКВа
+  STATE_PLAN            = 'P'  # Плановая закупка
+  STATE_UNPLAN          = 'V'  # Внеплановая закупка
+  STATE_ADD_PLAN        = 'D3' # Плановая дозакупка
+  STATE_ADD_UNPLAN_LESS = 'D1' # Внеплановая дозакупка менее 20%
+  STATE_APP_UNPLAN_MORE = 'D2' # Внеплановая дозакупка более 20%
+  IN_PROGRESS      = 1     # В работе
+  TENDER_COMPLETED = 2     # Закупка проведена
+  AQUA_DZO         = 'DZO' # Организатор процедуры (по умолчанию)
+  AQUA_EI          = 'EI'  # Способ закупки ЕИ
   INVESTMENTS      = 1     # Инвестиционные средства
+  OTHER            = 4     # Раздел контрактного пакета "Прочее"
+  RUSSIAN_RUBLE    = 'RUB' # Код валюты
 
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
@@ -33,9 +46,10 @@ class AquaLot
       # Закупка плановая/внеплановая (+ дозакупка)
       'LPLVP' => plan_lot.additional_to ? additional_state : lot_state,
       # Статус лота
-      'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ? 2 : 1,
+      'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ?
+                     TENDER_COMPLETED : IN_PROGRESS,
       # Организатор процедуры
-      'ORG' => Organizer.lookup(plan_lot.department_id) || 'DZO',
+      'ORG' => Organizer.lookup(plan_lot.department_id) || AQUA_DZO,
       # Закупочная комиссия
       'ZK' => comission,
       # Способ закупки (план)
@@ -43,11 +57,11 @@ class AquaLot
       # Способ закупки (по способу объявления)
       'SPZKF' => TenderType.lookup(last_tender.tender_type_id),
       # Способ закупки (ЕИ по итогам конкурентных процедур)
-      'SPZEI' => last_lot.future_plan_id == EI ? 'EI' : nil,
+      'SPZEI' => last_lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : nil,
       # Планируемая цена лота (руб. с НДС)
-      'SUMN' => plan_spec.cost_nds.to_s('F'),
+      'SUMN' => format_cost(plan_spec.cost_nds),
       # Планируемая цена лота (руб. без  НДС)
-      'SUM_' => plan_spec.cost.to_s('F'),
+      'SUM_' => format_cost(plan_spec.cost),
       # Документ, на основании которого определена планируемая цена
       'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
@@ -104,7 +118,19 @@ class AquaLot
       # Код по ОКДП
       'ZOKDP' => plan_spec.okdp_id,
       # Мин. необходимые требования, предъявляемые к закупаеой продукции
-      'ZMTREB' => plan_spec.requirements
+      'ZMTREB' => plan_spec.requirements,
+      # Раздел контрактного пакета
+      'SEQ' => OTHER,
+      # Причины невыполнения сроков объявления о процедуре и вскр. конвертов,
+      # Реквизиты протокола ЦЗК в случае отмены закупки
+      'PRN1' => prn1,
+      # Причины невыполнения срока заключения договора
+      'PRN2' => contract.non_contract_reason,
+      # Код валюты
+      'WAERS' => RUSSIAN_RUBLE,
+      # Номер процедуры на ЭТП
+      'ZNUMPR' => last_tender.etp_num
+      # Планируемый объем обязательств
     }
   end
 
@@ -127,6 +153,17 @@ class AquaLot
 
   def paragraph
     "00#{num}" if num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
+  end
+
+  def prn1
+    [].tap do |a|
+      if reason = last_lot.non_public_reason
+        a << reason
+      end
+      if id = plan_lot.protocol_id
+        a << Protocol.find(id).details 
+      end
+    end.join ' / '
   end
 
   # entities --------------------------------------------------------
@@ -168,13 +205,13 @@ class AquaLot
   end
 
   def winner_protocol
-    return NullContract.new unless @exec_spec_id
-    Contract.find(last_lot.winner_protocol_id) || NullContract.new
+    return NullWinnerProtocol.new unless @exec_spec_id
+    WinnerProtocol.find(last_lot.winner_protocol_id) || NullWinnerProtocol.new
   end
 
   def contract
-    return NullWinnerProtocol.new unless @exec_spec_id
-    WinnerProtocol.find(last_lot.id) || NullWinnerProtocol.new
+    return NullContract.new unless @exec_spec_id
+    Contract.find(last_lot.id) || NullContract.new
   end
 
   # helpers ---------------------------------------------------------
@@ -185,20 +222,35 @@ class AquaLot
   end
 
   def lot_state
-    in_plan? ? 'P' : 'V'
+    in_plan? ? STATE_PLAN : STATE_UNPLAN
   end
 
   def additional_state
-    if in_plan?
-      'D3'
-    else
-      additional_ratio < ADDITIONAL_RATIO ? 'D1' : 'D2'
-    end
+    in_plan? ? STATE_ADD_PLAN : additional_unplan_state
+  end
+
+  def additional_unplan_state
+    additional_ratio < ADDITIONAL_RATIO ?
+      STATE_ADD_UNPLAN_LESS : STATE_APP_UNPLAN_MORE
   end
 
   def additional_ratio
     main_lot_cost / additional_cost_sum
   end
+
+  def format_date(date)
+    date.strftime '%d.%m.%Y' if date
+  end
+
+  def format_guid(guid)
+    guid.bytes.map { |b| "%02X" % b }.join if guid
+  end
+
+  def format_cost(cost)
+    cost.to_s('F')
+  end
+
+  # data access -----------------------------------------------------
 
   def main_lot_cost
     DB.query_value(<<-sql)
@@ -235,7 +287,7 @@ class AquaLot
 
   def okato
     DB.query_value(<<-sql)
-      select coalesce(h.okato, a.okato)
+      select nvl(h.okato, a.okato)
         from ksazd.fias_plan_specifications s,
              ksazd.fias_houses h,
              ksazd.fias_addrs a
@@ -243,13 +295,5 @@ class AquaLot
           and s.addr_aoid = a.aoid
           and s.plan_specification_id = #{@plan_spec_id}
     sql
-  end
-
-  def format_date(date)
-    date.strftime '%d.%m.%Y' if date
-  end
-
-  def format_guid(guid)
-    guid.bytes.map { |b| "%02X" % b }.join if guid
   end
 end

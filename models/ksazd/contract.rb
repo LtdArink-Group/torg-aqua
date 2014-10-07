@@ -3,10 +3,10 @@ require 'db/model'
 class Contract < Model
   MAIN_CONTRACT = 37001 # Основной договор
 
-  attributes :confirm_date
+  attributes :confirm_date, :non_contract_reason
   schema :ksazd
   id_field :lot_id
   where type_id: MAIN_CONTRACT
 end
 
-NullContract = Struct.new(:confirm_date)
+NullContract = Struct.new(:confirm_date, :non_contract_reason)

@@ -2,7 +2,7 @@ require 'db/model'
 
 class Lot < Model
   attributes :id, :tender_id, :status_id, :winner_protocol_id,
-             :future_plan_id, :next_id
+             :future_plan_id, :next_id, :non_public_reason
   schema :ksazd
 end
 
