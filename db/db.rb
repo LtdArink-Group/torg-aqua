@@ -9,6 +9,12 @@ class DB
     exec(query).fetch
   end
 
+  def self.query_all(query)
+    [].tap do |a|
+      exec(query) { |r| a << r }
+    end
+  end
+
   def self.exec(statement, &block)
     log(statement) do
       connection.exec(statement, &block)

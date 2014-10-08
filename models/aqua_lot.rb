@@ -21,6 +21,8 @@ class AquaLot
   OTHER            = 4     # Раздел контрактного пакета "Прочее"
   RUSSIAN_RUBLE    = 'RUB' # Код валюты
 
+  attr_reader :plan_spec_id, :exec_spec_id
+
   def initialize(plan_spec_id, exec_spec_id)
     @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
   end
@@ -30,7 +32,7 @@ class AquaLot
       # Номер лота из КСАЗД (планирование)
       'ZNUMKSAZDP' => format_guid(plan_spec.guid),
       #Номер лота из КСАЗД (исполнение)
-      'ZNUMKSAZDF' => @exec_spec_id,
+      'ZNUMKSAZDF' => exec_spec_id,
       # Финансовый год
       'GJAHR' => plan_lot.gkpz_year,
       # Орг.единица
@@ -125,7 +127,7 @@ class AquaLot
       # Реквизиты протокола ЦЗК в случае отмены закупки
       'PRN1' => prn1,
       # Причины невыполнения срока заключения договора
-      'PRN2' => contract.non_contract_reason,
+      'PRN2' => last_lot.non_contract_reason,
       # Код валюты
       'WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
@@ -190,11 +192,11 @@ class AquaLot
   end
 
   def plan_spec
-    @plan_spec ||= PlanSpecification.find(@plan_spec_id)
+    @plan_spec ||= PlanSpecification.find(plan_spec_id)
   end
 
   def exec_spec
-    @exec_spec ||= Specification.find(@exec_spec_id)
+    @exec_spec ||= Specification.find(exec_spec_id)
   end
 
   def exec_lots
@@ -207,27 +209,27 @@ class AquaLot
   end
 
   def last_lot
-    return NullLot.new unless @exec_spec_id
+    return NullLot.new unless exec_spec_id
     @last_lot ||= exec_lots.last
   end
 
   def last_tender
-    return NullTender.new unless @exec_spec_id
+    return NullTender.new unless exec_spec_id
     @last_tender ||= Tender.find(last_lot.tender_id)
   end
 
   def open_protocol
-    return NullOpenProtocol.new unless @exec_spec_id
+    return NullOpenProtocol.new unless exec_spec_id
     OpenProtocol.find(last_lot.tender_id) || NullOpenProtocol.new
   end
 
   def winner_protocol
-    return NullWinnerProtocol.new unless @exec_spec_id
+    return NullWinnerProtocol.new unless exec_spec_id
     WinnerProtocol.find(last_lot.winner_protocol_id) || NullWinnerProtocol.new
   end
 
   def contract
-    return NullContract.new unless @exec_spec_id
+    return NullContract.new unless exec_spec_id
     Contract.find(last_lot.id) || NullContract.new
   end
 
@@ -256,8 +258,7 @@ class AquaLot
   end
 
   def plan_spec_amounts
-    @plan_spec_amounts ||= [].tap do |a|
-      plan_spec_amounts_query { |r| p r; a << r }
+    @plan_spec_amounts ||= plan_spec_amounts_from_db.tap do |a|
       zero = BigDecimal.new("0")
       (5 - a.size).times { a << [zero, zero, zero] }
     end
@@ -318,15 +319,15 @@ class AquaLot
              ksazd.fias_addrs a
         where s.houseid = h.houseid(+)
           and s.addr_aoid = a.aoid
-          and s.plan_specification_id = #{@plan_spec_id}
+          and s.plan_specification_id = #{plan_spec_id}
     sql
   end
 
-  def plan_spec_amounts_query(&block)
-    DB.exec(<<-sql, &block)
+  def plan_spec_amounts_from_db
+    DB.query_all(<<-sql)
       select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
         from ksazd.plan_spec_amounts a
-        where a.plan_specification_id = #{@plan_spec_id}
+        where a.plan_specification_id = #{plan_spec_id}
         order by a.year
     sql
   end
