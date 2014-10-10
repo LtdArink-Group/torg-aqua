@@ -1,7 +1,9 @@
 require 'models/ksazd'
 require 'models/mapping'
+require 'bigdecimal'
 
 class AquaLot
+  ZERO = BigDecimal.new('0')
   # ИС КСАЗД
   FUTURE_PLAN_EI   = 31003 # Заключить договор с единственным поставщиком
   CONTRACT_DONE    = 33100 # Договор заключен
@@ -153,6 +155,10 @@ class AquaLot
     }
   end
 
+  def plan_lot_id
+    plan_spec.plan_lot_id
+  end
+
   private
 
   # hash values -----------------------------------------------------
@@ -259,8 +265,7 @@ class AquaLot
 
   def plan_spec_amounts
     @plan_spec_amounts ||= plan_spec_amounts_from_db.tap do |a|
-      zero = BigDecimal.new("0")
-      (5 - a.size).times { a << [zero, zero, zero] }
+      (5 - a.size).times { a << Array.new(3, ZERO) }
     end
   end
 

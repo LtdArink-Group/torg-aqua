@@ -39,7 +39,7 @@ class Model
     @values = DB.query_first_row(sql)
   end
 
-  attr_reader :values
+  attr_accessor :values
 
   private
 
