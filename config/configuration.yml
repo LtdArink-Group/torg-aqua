@@ -1,0 +1,7 @@
+database:
+  login: ksazd2aqua_test
+  password: ksazd2aqua
+  tns: ksazd_backup
+intgration:
+  start_year: 2014
+  start_time: 2013-01-01T00:00:00.0Z

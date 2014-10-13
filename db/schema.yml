@@ -43,3 +43,6 @@ subdirections:
   ksazd_direction_id: number(38)
   ksazd_subject_type_id: number(38)
   aqua_description: varchar2(200)
+state:
+  setting: varchar2(100)
+  value: varchar2(100)

@@ -1,4 +1,5 @@
 require 'oci8'
+require 'config/configuration'
 
 class DB
   def self.query_value(query)
@@ -26,7 +27,9 @@ class DB
   end
 
   def self.connection
-    @connection ||= OCI8.new('ksazd2aqua_test', 'ksazd2aqua', 'ksazd_backup')
+    @connection ||= OCI8.new(Configuration.database.login,
+                             Configuration.database.password,
+                             Configuration.database.tns)
   end
 
   def self.log(statement)
