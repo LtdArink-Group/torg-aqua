@@ -13,7 +13,7 @@ group :development do
   gem 'pry'
   gem 'rb-readline'
   gem 'whenever', require: false
-  gem 'rubocop'
+  gem 'guard-rubocop'
 end
 
 group :development, :test do
