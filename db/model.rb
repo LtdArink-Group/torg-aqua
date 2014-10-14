@@ -21,7 +21,9 @@ class Model
       @id_fields = symbols.map(&:to_s)
     end
 
-    attr_writer :hash
+    def where(hash)
+      @where = hash
+    end
 
     def find(*ids)
       model = new(*ids).tap(&:load)
