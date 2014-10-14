@@ -37,11 +37,15 @@ class DB
     result = yield
     delta = (Time.now - start) * 1_000
     statement = statement.gsub(/--.*$/, '').gsub(/\s+/, ' ').strip
-    puts "SQL (%.1fms) '%s'" % [delta, statement]
+    puts format("SQL (%.1fms) '%s'", delta, statement)
     result
   end
 
   def self.encode(val)
-    val.nil? ? 'null' : val.is_a?(String) ? "'#{val}'" : val
+    if val.nil?
+      'null'
+    else
+      val.is_a?(String) ? "'#{val}'" : val
+    end
   end
 end

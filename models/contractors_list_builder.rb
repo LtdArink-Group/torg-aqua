@@ -64,7 +64,7 @@ class ContractorsListBuilder
       'OTKL' => nil, 'ZOZ' => nil, 'ZNPP' => nil, 'POBED' => nil,
       'ZSUM' => ZERO, 'ZSUMWOVAT' => ZERO, 'PSUM' => ZERO, 'PSUMWOVAT' => ZERO,
       'PERETORG' => 'false', 'PKOL' => 0
-    }    
+    }
   end
 
   def plan_lot_contractors

@@ -33,7 +33,7 @@ class AquaLot
     {
       # Номер лота из КСАЗД (планирование)
       'ZNUMKSAZDP' => format_guid(plan_spec.guid),
-      #Номер лота из КСАЗД (исполнение)
+      # Номер лота из КСАЗД (исполнение)
       'ZNUMKSAZDF' => exec_spec_id,
       # Финансовый год
       'GJAHR' => plan_lot.gkpz_year,
@@ -46,12 +46,11 @@ class AquaLot
       # Название лота
       'LNAME' => plan_spec.name,
       # Номер лота
-      'LNUM' => "%d.%d" % [plan_lot.num_tender, plan_lot.num_lot],
+      'LNUM' => format('%d.%d', plan_lot.num_tender, plan_lot.num_lot),
       # Закупка плановая/внеплановая (+ дозакупка)
       'LPLVP' => plan_lot.additional_to ? additional_state : lot_state,
       # Статус лота
-      'LOTSTATUS' => (@exec_spec_id && last_lot.status_id == CONTRACT_DONE) ?
-                     TENDER_COMPLETED : IN_PROGRESS,
+      'LOTSTATUS' => lotstatus,
       # Организатор процедуры
       'ORG' => Organizer.lookup(plan_lot.department_id) || AQUA_DZO,
       # Закупочная комиссия
@@ -166,14 +165,21 @@ class AquaLot
   def customer
     ksazd_id = plan_spec.customer_id
     Department.lookup(ksazd_id) ||
-      begin raise "Не удалось найти заказчика АКВА для id: #{ksazd_id}" end
+      begin fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}" end
+  end
+
+  def lotstatus
+    if @exec_spec_id && last_lot.status_id == CONTRACT_DONE
+      TENDER_COMPLETED
+    else
+      IN_PROGRESS
+    end
   end
 
   def comission
-    if plan_lot.commission_id
-      type_id = Commission.find(plan_lot.commission_id).commission_type_id
-      CommissionType.lookup(type_id)
-    end
+    return unless plan_lot.commission_id
+    type_id = Commission.find(plan_lot.commission_id).commission_type_id
+    CommissionType.lookup(type_id)
   end
 
   def paragraph
@@ -186,7 +192,7 @@ class AquaLot
         a << reason
       end
       if id = plan_lot.protocol_id
-        a << Protocol.find(id).details 
+        a << Protocol.find(id).details
       end
     end.join ' / '
   end
@@ -255,8 +261,11 @@ class AquaLot
   end
 
   def additional_unplan_state
-    additional_ratio < ADDITIONAL_RATIO ?
-      STATE_ADD_UNPLAN_LESS : STATE_ADD_UNPLAN_MORE
+    if additional_ratio < ADDITIONAL_RATIO
+      STATE_ADD_UNPLAN_LESS
+    else
+      STATE_ADD_UNPLAN_MORE
+    end
   end
 
   def additional_ratio
@@ -274,7 +283,7 @@ class AquaLot
   end
 
   def format_guid(guid)
-    guid.bytes.map { |b| "%02X" % b }.join if guid
+    guid.bytes.map { |b| format('%02X', b) }.join if guid
   end
 
   def format_cost(cost)

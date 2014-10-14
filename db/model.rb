@@ -21,12 +21,10 @@ class Model
       @id_fields = symbols.map(&:to_s)
     end
 
-    def where(hash)
-      @where = hash
-    end
+    attr_writer :hash
 
     def find(*ids)
-      model = self.new(*ids).tap { |s| s.load }
+      model = new(*ids).tap(&:load)
       model.values ? model : nil
     end
   end
@@ -60,7 +58,7 @@ class Model
   end
 
   def table_suffix
-    %w{s x}.include?(table_name[-1]) ? 'es' : 's'
+    %w(s x).include?(table_name[-1]) ? 'es' : 's'
   end
 
   def table
@@ -78,11 +76,10 @@ class Model
   end
 
   def additional_conditions
-    if self.class.instance_variables.include?(:@where)
-      self.class.instance_variable_get(:@where).map do |field, value|
-        " and #{field} = #{DB.encode(value)}"
-      end.join
-    end
+    return unless self.class.instance_variables.include?(:@where)
+    self.class.instance_variable_get(:@where).map do |field, value|
+      " and #{field} = #{DB.encode(value)}"
+    end.join
   end
 
   def sql

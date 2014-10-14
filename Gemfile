@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
- 
+
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'ruby-oci8'
@@ -12,7 +12,8 @@ group :development do
   gem 'tux'
   gem 'pry'
   gem 'rb-readline'
-  gem 'whenever', require: false  
+  gem 'whenever', require: false
+  gem 'rubocop'
 end
 
 group :development, :test do

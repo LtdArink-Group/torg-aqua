@@ -19,7 +19,7 @@ class Table
 
   private
 
-  def drop 
+  def drop
     DB.exec "drop table #{@name}"
   end
 
