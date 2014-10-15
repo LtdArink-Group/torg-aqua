@@ -33,9 +33,29 @@ namespace :integration do
     require 'models/user'
     puts "Users in db: #{User.count}"
   end
+end
 
-  desc 'Intergation test'
-  task :test do
+namespace :test do
+  require 'awesome_print'
+
+  desc 'Aqua lot test'
+  task :aqua_lot do
+    require 'models/aqua_lot'
+    lot = AquaLot.new(343163,819607)
+    ap lot.to_h
+  end
+
+  desc 'Contractors list test'
+  task :contractors_list do
+    require 'models/aqua_lot'
+    require 'models/contractors_list_builder'
+    lot = AquaLot.new(343163,819607)
+    builder = ContractorsListBuilder.new(lot)
+    ap builder.contractors
+  end
+
+  desc 'SOAP client test (projects)'
+  task :soap_projects do
     require 'soap/client'
     puts 'Getting project data from AQUA'
     template = "%{spp_parent}\t%{spp}\t%{pspnr}\t%{name}\t%{long_name}\t" \

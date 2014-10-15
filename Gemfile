@@ -14,6 +14,7 @@ group :development do
   gem 'rb-readline'
   gem 'whenever', require: false
   gem 'guard-rubocop'
+  gem 'awesome_print'
 end
 
 group :development, :test do
