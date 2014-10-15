@@ -37,6 +37,7 @@ end
 
 namespace :test do
   require 'awesome_print'
+  require 'pp'
 
   desc 'Aqua lot test'
   task :aqua_lot do
@@ -56,14 +57,17 @@ namespace :test do
 
   desc 'SOAP client test (projects)'
   task :soap_projects do
-    require 'soap/client'
+    require 'soap/projects'
     puts 'Getting project data from AQUA'
-    template = "%{spp_parent}\t%{spp}\t%{pspnr}\t%{name}\t%{long_name}\t" \
-               "%{long_text}\t%{mark_deleted}\t%{posid}\t%{mark_block_planning}"
-    open('projects.tsv', 'w') do |f|
-      SOAP::Client.new.data.each do |row|
-        f.puts template % row
+    from = '13.10.2014'
+    to = '13.10.2014'
+    client = SOAP::Projects.new(from, to)
+    return puts "Error: #{client.message}" unless client.status == 'S'
+    # open('projects.tsv', 'w') do |f|
+      client.data.each do |row|
+      #   # f.puts template % row
+         ap row.map { |v| v[1] }.join("\t")
       end
-    end
+    # end
   end
 end

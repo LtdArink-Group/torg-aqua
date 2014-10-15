@@ -1,29 +1,27 @@
 require 'savon'
+require 'config/configuration'
 
 module SOAP
   class Client
-    def client
-      @client ||= Savon.client(wsdl: '../zppm_projc_upload_17092014_in.wsdl',
-                               proxy: 'http://zyablickiy_ss:asdfG1hjkl@172.30.45.131:8080/',
-                               basic_auth: %w(1c, 1c123456),
-                               convert_request_keys_to: :upcase)
-    end
+    class << self
+      def call(operation_name, locals = {}, &block)
+        client.call(operation_name, locals, &block)
+      end
 
-    def params
-      { 'IV_DATE_FR' => '01.01.2014', 'IV_DATE_TO' => '31.12.2014',
-        'IV_SYST_ID' => '01' }
-    end
+      def client
+        @client ||= Savon.client(options)
+      end
 
-    def operation
-      :zppm_proj_upload
-    end
-
-    def response
-      client.call operation, message: params
-    end
-
-    def data
-      @data ||= response.body[:zppm_proj_upload_response][:et_project][:item]
+      def options
+        options = {}.tap do |o|
+          o.merge! proxy: Configuration.soap.proxy if Configuration.soap.proxy
+        end
+        options.merge(
+          wsdl: Configuration.soap.wsdl,
+          basic_auth: [Configuration.soap.login, Configuration.soap.password],
+          convert_request_keys_to: :upcase
+        )
+      end
     end
   end
 end

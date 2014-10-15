@@ -29,6 +29,29 @@ class Model
       model = new(*ids).tap(&:load)
       model.values ? model : nil
     end
+
+    def create(values_hash)
+      DB.exec(<<-sql)
+        insert into #{table} (#{ values_hash.keys.to_s.join(', ') })
+          values (#{ values_hash.values.map { |val| DB.encode(val) }.join(', ') })
+      sql
+    end
+
+    def schema_name
+      @schema ? @schema + '.' : ''
+    end
+
+    def table_name
+      @table_name ||= to_s.scan(/[A-Z][a-z]+/).map(&:downcase).join('_')
+    end
+
+    def table_suffix
+      %w(s x).include?(table_name[-1]) ? 'es' : 's'
+    end
+
+    def table
+      schema_name + table_name + table_suffix
+    end
   end
 
   def initialize(*ids)
@@ -45,26 +68,6 @@ class Model
 
   def fields
     self.class.instance_variable_get(:@attributes).join(', ')
-  end
-
-  def schema
-    if self.class.instance_variables.include?(:@schema)
-      self.class.instance_variable_get(:@schema) + '.'
-    else
-      ''
-    end
-  end
-
-  def table_name
-    @table_name ||= self.class.to_s.scan(/[A-Z][a-z]+/).map(&:downcase).join('_')
-  end
-
-  def table_suffix
-    %w(s x).include?(table_name[-1]) ? 'es' : 's'
-  end
-
-  def table
-    schema + table_name + table_suffix
   end
 
   def id_fields
@@ -85,7 +88,7 @@ class Model
   end
 
   def sql
-    "select #{fields} from #{table} " \
+    "select #{fields} from #{self.class.table} " \
     "where #{id_conditions}#{additional_conditions}"
   end
 end
