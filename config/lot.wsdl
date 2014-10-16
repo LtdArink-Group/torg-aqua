@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions targetNamespace="urn:sap-com:document:sap:rfc:functions" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsoap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="urn:sap-com:document:sap:rfc:functions">
+	<wsdl:documentation>
+		<sidl:sidl xmlns:sidl="http://www.sap.com/2007/03/sidl" />
+	</wsdl:documentation>
+	<wsdl:types>
+		<xsd:schema attributeFormDefault="qualified" targetNamespace="urn:sap-com:document:sap:rfc:functions">
+			<xsd:simpleType name="RfcException.Message.Number">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="3" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="byte16">
+				<xsd:restriction base="xsd:base64Binary">
+					<xsd:maxLength value="16" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char1">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="1" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char10">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="10" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char1000">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="1000" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char12">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="12" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char120">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="120" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char14">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="14" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char15">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="15" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char2">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="2" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char20">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="20" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char255">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="255" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char3">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="3" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char35">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="35" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char360">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="360" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char40">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="40" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char500">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="500" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char60">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="60" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char7">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="7" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char70">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="70" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char8">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="8" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char80">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="80" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char9">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="9" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="cuky5">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="5" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="curr17.2">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="17" />
+					<xsd:fractionDigits value="2" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="curr21.2">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="21" />
+					<xsd:fractionDigits value="2" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="date10">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="10" />
+					<xsd:pattern value="\d\d\d\d-\d\d-\d\d" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="decimal12.0">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="12" />
+					<xsd:fractionDigits value="0" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="decimal2.0">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="2" />
+					<xsd:fractionDigits value="0" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="decimal3.0">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="3" />
+					<xsd:fractionDigits value="0" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric16">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="16" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric4">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="4" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric8">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="8" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="quantum13.3">
+				<xsd:restriction base="xsd:decimal">
+					<xsd:totalDigits value="13" />
+					<xsd:fractionDigits value="3" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="time">
+				<xsd:restriction base="xsd:time">
+					<xsd:pattern value="[0-9]{2}:[0-9]{2}:[0-9]{2}" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:complexType name="ZPPM_LOTS_KSAZD_IN">
+				<xsd:sequence>
+					<xsd:element name="GUID_GKPZ" type="tns:byte16" />
+					<xsd:element name="GJAHR" type="tns:numeric4" />
+					<xsd:element name="ZZCUSTOMER_ID" type="tns:numeric8" />
+					<xsd:element name="OBJECT_TYPE" type="tns:char10" />
+					<xsd:element name="TEXT" type="tns:char60" />
+					<xsd:element name="STATUS" type="tns:char40" />
+					<xsd:element name="FUNBUD" type="tns:char10" />
+					<xsd:element name="DATES" type="tns:date10" />
+					<xsd:element name="USERS" type="tns:char12" />
+					<xsd:element name="DATEI" type="tns:date10" />
+					<xsd:element name="USERI" type="tns:char12" />
+					<xsd:element name="WAERS" type="tns:cuky5" />
+					<xsd:element name="LOT_GUID" type="tns:byte16" />
+					<xsd:element name="PARENT_GUID" type="tns:byte16" />
+					<xsd:element name="GRZK" type="tns:char10" />
+					<xsd:element name="PGUID" type="tns:byte16" />
+					<xsd:element name="LNAME" type="tns:char360" />
+					<xsd:element name="LNUM" type="tns:char35" />
+					<xsd:element name="LNUM_STATIC" type="tns:char1" />
+					<xsd:element name="LPLVP" type="tns:char2" />
+					<xsd:element name="LOTSTATUS" type="tns:char1" />
+					<xsd:element name="LOTDEL" type="tns:char1" />
+					<xsd:element name="ORG" type="tns:char10" />
+					<xsd:element name="ZK" type="tns:char10" />
+					<xsd:element name="SPZKP" type="tns:char10" />
+					<xsd:element name="SPZKF" type="tns:char10" />
+					<xsd:element name="SPZEI" type="tns:char10" />
+					<xsd:element name="SUMN" type="tns:curr17.2" />
+					<xsd:element name="NDS" type="tns:decimal2.0" />
+					<xsd:element name="SUM_" type="tns:curr17.2" />
+					<xsd:element name="DOCTYPE" type="tns:char15" />
+					<xsd:element name="DATEPK" type="tns:date10" />
+					<xsd:element name="DATEPV" type="tns:date10" />
+					<xsd:element name="DATEPI" type="tns:date10" />
+					<xsd:element name="DATEPD" type="tns:date10" />
+					<xsd:element name="DATEFK" type="tns:date10" />
+					<xsd:element name="DATEFV" type="tns:date10" />
+					<xsd:element name="DATEFI" type="tns:date10" />
+					<xsd:element name="DATEFD" type="tns:date10" />
+					<xsd:element name="PERETORG" type="tns:char10" />
+					<xsd:element name="PKOL" type="tns:decimal3.0" />
+					<xsd:element name="SSLOT" type="tns:byte16" />
+					<xsd:element name="FIN_GROUP" type="tns:char10" />
+					<xsd:element name="B2BP" type="tns:char1" />
+					<xsd:element name="B2BF" type="tns:char1" />
+					<xsd:element name="ZKURATOR" type="tns:char80" />
+					<xsd:element name="DATENP" type="tns:date10" />
+					<xsd:element name="DATEOP" type="tns:date10" />
+					<xsd:element name="KURATOR" type="tns:char60" />
+					<xsd:element name="TKURATOR" type="tns:char60" />
+					<xsd:element name="L_FUNBUD" type="tns:char10" />
+					<xsd:element name="P_REASON" type="tns:char1000" />
+					<xsd:element name="P_REASON_DOC" type="tns:char120" />
+					<xsd:element name="P_PARAGRAPH" type="tns:char3" />
+					<xsd:element name="ZEI" type="tns:quantum13.3" />
+					<xsd:element name="OKEI" type="tns:char3" />
+					<xsd:element name="OKATO" type="tns:char8" />
+					<xsd:element name="ZOKVED" type="tns:char20" />
+					<xsd:element name="ZOKPD" type="tns:char7" />
+					<xsd:element name="ZMTREB" type="tns:char1000" />
+					<xsd:element name="SEQ" type="tns:char2" />
+					<xsd:element name="PRN1" type="tns:char500" />
+					<xsd:element name="PRN2" type="tns:char500" />
+					<xsd:element name="L_WAERS" type="tns:cuky5" />
+					<xsd:element name="ZERNAM" type="tns:char12" />
+					<xsd:element name="ZERDAT" type="tns:date10" />
+					<xsd:element name="ZAENAM" type="tns:char12" />
+					<xsd:element name="ZAEDAT" type="tns:date10" />
+					<xsd:element name="ZNUMPR" type="tns:char8" />
+					<xsd:element name="ZNUMKSAZDP" type="tns:byte16" />
+					<xsd:element name="ZNUMKSAZDF" type="tns:decimal12.0" />
+					<xsd:element name="FINSN5Y1" type="tns:curr21.2" />
+					<xsd:element name="FINSN5Y2" type="tns:curr21.2" />
+					<xsd:element name="FINSN5Y3" type="tns:curr21.2" />
+					<xsd:element name="FINSN5Y4" type="tns:curr21.2" />
+					<xsd:element name="FINSN5Y5" type="tns:curr21.2" />
+					<xsd:element name="OSVBN5Y1" type="tns:curr21.2" />
+					<xsd:element name="OSVBN5Y2" type="tns:curr21.2" />
+					<xsd:element name="OSVBN5Y3" type="tns:curr21.2" />
+					<xsd:element name="OSVBN5Y4" type="tns:curr21.2" />
+					<xsd:element name="OSVBN5Y5" type="tns:curr21.2" />
+					<xsd:element name="OSVSN5Y1" type="tns:curr21.2" />
+					<xsd:element name="OSVSN5Y2" type="tns:curr21.2" />
+					<xsd:element name="OSVSN5Y3" type="tns:curr21.2" />
+					<xsd:element name="OSVSN5Y4" type="tns:curr21.2" />
+					<xsd:element name="OSVSN5Y5" type="tns:curr21.2" />
+					<xsd:element name="UCH_KSDAZD_TAB" type="tns:ZPPM_UCH_KSAZD_IN_TT" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZPPM_UCH_KSAZD_IN_TS">
+				<xsd:sequence>
+					<xsd:element name="PARTNER_NAME" type="tns:char255" />
+					<xsd:element name="INN" type="tns:char14" />
+					<xsd:element name="KPP" type="tns:char9" />
+					<xsd:element name="ZNUMC1C" type="tns:char10" />
+					<xsd:element name="ALT_OFFER" type="tns:char1" />
+					<xsd:element name="PLANU" type="tns:char1" />
+					<xsd:element name="REGZP" type="tns:char1" />
+					<xsd:element name="PODZA" type="tns:char1" />
+					<xsd:element name="OTKL" type="tns:char1" />
+					<xsd:element name="ZOZ" type="tns:char1" />
+					<xsd:element name="ZNPP" type="tns:char1" />
+					<xsd:element name="POBED" type="tns:char1" />
+					<xsd:element name="ZSUM" type="tns:curr17.2" />
+					<xsd:element name="ZSUMWOVAT" type="tns:curr17.2" />
+					<xsd:element name="PSUM" type="tns:curr17.2" />
+					<xsd:element name="PSUMWOVAT" type="tns:curr17.2" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZPPM_LOTS_UP_RET">
+				<xsd:sequence>
+					<xsd:element name="DOCNUM" type="tns:numeric16" />
+					<xsd:element name="STATUS" type="tns:char2" />
+					<xsd:element name="STATXT" type="tns:char70" />
+					<xsd:element name="RCVPRN" type="tns:char10" />
+					<xsd:element name="CREDAT" type="tns:date10" />
+					<xsd:element name="CRETIM" type="tns:time" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="RfcException.Message">
+				<xsd:sequence>
+					<xsd:element name="ID" type="xsd:string" />
+					<xsd:element name="Number" type="tns:RfcException.Message.Number" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZFM_PPM_LOTS_KSAZD_IN_WS.RfcException">
+				<xsd:sequence>
+					<xsd:element name="Name" type="tns:ZFM_PPM_LOTS_KSAZD_IN_WS.RfcExceptions" />
+					<xsd:element name="Text" type="xsd:string" minOccurs="0" />
+					<xsd:element name="Message" type="tns:RfcException.Message" minOccurs="0" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZPPM_LOTS_KSAZD_IN_T">
+				<xsd:sequence>
+					<xsd:element name="item" type="tns:ZPPM_LOTS_KSAZD_IN" minOccurs="0" maxOccurs="unbounded" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZPPM_UCH_KSAZD_IN_TT">
+				<xsd:sequence>
+					<xsd:element name="item" type="tns:ZPPM_UCH_KSAZD_IN_TS" minOccurs="0" maxOccurs="unbounded" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:simpleType name="ZFM_PPM_LOTS_KSAZD_IN_WS.RfcExceptions">
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="ERROR_CREATING_IDOCS" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:element name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" type="tns:ZFM_PPM_LOTS_KSAZD_IN_WS.RfcException" />
+			<xsd:element name="ZFM_PPM_LOTS_KSAZD_IN_WS">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="I_LOTS" type="tns:ZPPM_LOTS_KSAZD_IN_T" /></xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ZFM_PPM_LOTS_KSAZD_IN_WSResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="STATUS_RET" type="tns:ZPPM_LOTS_UP_RET" /></xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="ZFM_PPM_LOTS_KSAZD_IN_WS">
+		<wsdl:part name="parameters" element="tns:ZFM_PPM_LOTS_KSAZD_IN_WS" /></wsdl:message>
+	<wsdl:message name="ZFM_PPM_LOTS_KSAZD_IN_WSResponse">
+		<wsdl:part name="parameter" element="tns:ZFM_PPM_LOTS_KSAZD_IN_WSResponse" /></wsdl:message>
+	<wsdl:message name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception">
+		<wsdl:part name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" element="tns:ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" /></wsdl:message>
+	<wsdl:portType name="ZPPM_LOTS_KSAZD_LOAD">
+		<wsdl:operation name="ZFM_PPM_LOTS_KSAZD_IN_WS">
+			<wsdl:input message="tns:ZFM_PPM_LOTS_KSAZD_IN_WS" />
+			<wsdl:output message="tns:ZFM_PPM_LOTS_KSAZD_IN_WSResponse" />
+			<wsdl:fault name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" message="tns:ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" /></wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ZPPM_LOTS_KSAZD_LOAD_BND" type="tns:ZPPM_LOTS_KSAZD_LOAD">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+		<wsdl:operation name="ZFM_PPM_LOTS_KSAZD_IN_WS">
+			<soap:operation soapAction="urn:sap-com:document:sap:rfc:functions:ZPPM_LOTS_KSAZD_LOAD:ZFM_PPM_LOTS_KSAZD_IN_WSRequest" style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception">
+				<soap:fault name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" use="literal" />
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ZPPM_LOTS_KSAZD_LOAD_EP">
+		<wsdl:port name="ZPPM_LOTS_KSAZD_LOAD_BND" binding="tns:ZPPM_LOTS_KSAZD_LOAD_BND">
+			<soap:address location="http://akva.gidroogk.com:8090/er2/sap/bc/srt/rfc/sap/zppm_lots_ksazd_load/400/zppm_lots_ksazd_load_ep/zppm_lots_ksazd_load_bnd" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

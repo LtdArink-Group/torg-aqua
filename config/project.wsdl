@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions targetNamespace="urn:sap-com:document:sap:rfc:functions" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsoap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="urn:sap-com:document:sap:rfc:functions">
+	<wsdl:documentation>
+		<sidl:sidl xmlns:sidl="http://www.sap.com/2007/03/sidl" />
+	</wsdl:documentation>
+	<wsdl:types>
+		<xsd:schema attributeFormDefault="qualified" targetNamespace="urn:sap-com:document:sap:rfc:functions">
+			<xsd:simpleType name="char1">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="1" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char10">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="10" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char180">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="180" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char20">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="20" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char220">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="220" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char24">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="24" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char255">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="255" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char30">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="30" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char32">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="32" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char50">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="50" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="char60">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="60" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric3">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="3" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric6">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="6" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType name="numeric8">
+				<xsd:restriction base="xsd:string">
+					<xsd:maxLength value="8" />
+					<xsd:pattern value="\d*" /></xsd:restriction>
+			</xsd:simpleType>
+			<xsd:complexType name="ZPPM_PROJK_UPLOAD">
+				<xsd:sequence>
+					<xsd:element name="SPP_PARENT" type="tns:char24" />
+					<xsd:element name="SPP" type="tns:char24" />
+					<xsd:element name="PSPNR" type="tns:numeric8" />
+					<xsd:element name="NAME" type="tns:char60" />
+					<xsd:element name="LONG_NAME" type="tns:char180" />
+					<xsd:element name="LONG_TEXT" type="tns:char255" />
+					<xsd:element name="MARK_DELETED" type="tns:char1" />
+					<xsd:element name="POSID" type="tns:char24" />
+					<xsd:element name="MARK_BLOCK_PLANNING" type="tns:char1" />
+					<xsd:element name="VERNR" type="tns:numeric8" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="BAPIRET2">
+				<xsd:sequence>
+					<xsd:element name="TYPE" type="tns:char1" />
+					<xsd:element name="ID" type="tns:char20" />
+					<xsd:element name="NUMBER" type="tns:numeric3" />
+					<xsd:element name="MESSAGE" type="tns:char220" />
+					<xsd:element name="LOG_NO" type="tns:char20" />
+					<xsd:element name="LOG_MSG_NO" type="tns:numeric6" />
+					<xsd:element name="MESSAGE_V1" type="tns:char50" />
+					<xsd:element name="MESSAGE_V2" type="tns:char50" />
+					<xsd:element name="MESSAGE_V3" type="tns:char50" />
+					<xsd:element name="MESSAGE_V4" type="tns:char50" />
+					<xsd:element name="PARAMETER" type="tns:char32" />
+					<xsd:element name="ROW" type="xsd:int" />
+					<xsd:element name="FIELD" type="tns:char30" />
+					<xsd:element name="SYSTEM" type="tns:char10" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="ZPPM_PROJK_UPLOAD_T">
+				<xsd:sequence>
+					<xsd:element name="item" type="tns:ZPPM_PROJK_UPLOAD" minOccurs="0" maxOccurs="unbounded" /></xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="ZPPM_PROJ_UPLOAD">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="IV_DATE_FR" type="tns:char10" />
+						<xsd:element name="IV_DATE_TO" type="tns:char10" />
+						<xsd:element name="IV_SYST_ID" type="tns:char10" /></xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ZPPM_PROJ_UPLOADResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="ES_RET" type="tns:BAPIRET2" />
+						<xsd:element name="ET_PROJECT" type="tns:ZPPM_PROJK_UPLOAD_T" /></xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="ZPPM_PROJ_UPLOAD">
+		<wsdl:part name="parameters" element="tns:ZPPM_PROJ_UPLOAD" /></wsdl:message>
+	<wsdl:message name="ZPPM_PROJ_UPLOADResponse">
+		<wsdl:part name="parameter" element="tns:ZPPM_PROJ_UPLOADResponse" /></wsdl:message>
+	<wsdl:portType name="ZPPM_PROJC_UPLOAD">
+		<wsdl:operation name="ZPPM_PROJ_UPLOAD">
+			<wsdl:input message="tns:ZPPM_PROJ_UPLOAD" />
+			<wsdl:output message="tns:ZPPM_PROJ_UPLOADResponse" /></wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="BN1" type="tns:ZPPM_PROJC_UPLOAD">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+		<wsdl:operation name="ZPPM_PROJ_UPLOAD">
+			<soap:operation soapAction="urn:sap-com:document:sap:rfc:functions:ZPPM_PROJC_UPLOAD:ZPPM_PROJ_UPLOADRequest" style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ZPPM_PROJC_UPLOAD">
+		<wsdl:port name="BN1" binding="tns:BN1">
+			<soap:address location="http://akva.gidroogk.com:8090/er2/sap/bc/srt/rfc/sap/zppm_projc_upload/400/zppm_projc_upload/bn1" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

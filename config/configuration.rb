@@ -13,10 +13,26 @@ module Configuration
 
     def soap
       @soap ||= OpenStruct.new.tap do |soap|
-        soap.wsdl = values['soap']['wsdl']
         soap.proxy = values['soap']['proxy']
-        soap.login = values['soap']['login']
-        soap.password = values['soap']['password']
+        soap.lot = lot
+        soap.project = project
+      end
+    end
+
+    def lot
+      OpenStruct.new.tap do |lot|
+        lot.wsdl = values['soap']['lot']['wsdl']
+        lot.login = values['soap']['lot']['login']
+        lot.password = values['soap']['lot']['password']
+      end
+    end
+
+    def project
+      OpenStruct.new.tap do |project|
+        project.wsdl = values['soap']['project']['wsdl']
+        project.login = values['soap']['project']['login']
+        project.password = values['soap']['project']['password']
+        project.system = values['soap']['project']['system']
       end
     end
 

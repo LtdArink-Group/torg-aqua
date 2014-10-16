@@ -3,11 +3,13 @@ require 'soap/client'
 module SOAP
   class Projects
     def initialize(from, to)
+      config = Configuration.soap.project
       @params = {
         'IV_DATE_FR' => from,
         'IV_DATE_TO' => to,
-        'IV_SYST_ID' => '02'
+        'IV_SYST_ID' => config.system
       }
+      @client = SOAP::Client.new(config.wsdl, config.login, config.password)
     end
 
     def status
@@ -27,10 +29,10 @@ module SOAP
 
     private
 
-    attr_reader :params
+    attr_reader :params, :client
 
     def response
-      @response ||= SOAP::Client.call :zppm_proj_upload, message: params
+      @response ||= client.call :zppm_proj_upload, message: params
     end
 
     def body

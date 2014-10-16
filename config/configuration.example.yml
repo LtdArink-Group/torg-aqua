@@ -3,7 +3,7 @@ database:
   password: password
   tns: tns
 soap:
-  wsdl: ../zppm_projc_upload_17092014_in.wsdl
+  wsdl: ../file.wsdl
   proxy: http://user:password@proxy.address:8080/
   login: login
   password: password
