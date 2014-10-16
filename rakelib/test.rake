@@ -19,12 +19,12 @@ namespace :test do
   end
 
   def projects(from, to)
-    require 'soap/projects'
-    client = SOAP::Projects.new(from, to)
-    if client.status == 'S'
-      yield client.data
+    require 'aqua/projects_endpoint'
+    response = ProjectsEndpoint.new(from, to)
+    if response.status == 'S'
+      yield response.data
     else
-      puts "Error: #{client.message}" 
+      puts "Error: #{response.message}" 
     end
   end
 
