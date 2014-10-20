@@ -48,6 +48,6 @@ project_departments:
   aqua_name: varchar2(100)
   ksazd_id: number(38)
   ksazd_name: varchar2(100)
-state:
-  setting: varchar2(100)
+app_variables:
+  key: varchar2(100)
   value: varchar2(100)

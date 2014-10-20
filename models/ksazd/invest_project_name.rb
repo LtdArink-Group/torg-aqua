@@ -4,7 +4,7 @@ class InvestProjectName < Model
   schema :ksazd
 
   def self.merge(aqua_id, name, department_id)
-    sql = <<-sql
+    DB.exec(<<-sql)
       merge into #{table} t using
       (select '#{aqua_id}' aqua_id, '#{name}' name,
               #{department_id} department_id
@@ -18,8 +18,6 @@ class InvestProjectName < Model
         values (#{table}_seq.nextval, s.name, s.aqua_id, s.department_id,
                 sysdate, sysdate)
     sql
-    puts sql
-    DB.exec(sql)
     DB.commit
   end
 end

@@ -109,6 +109,7 @@ GEM
       nori (~> 2.4.0)
       uuid (~> 2.3.7)
       wasabi (~> 3.3.0)
+    settingslogic (2.0.9)
     shotgun (0.9)
       rack (>= 1.0)
     sinatra (1.4.5)
@@ -162,6 +163,7 @@ DEPENDENCIES
   rspec
   ruby-oci8
   savon
+  settingslogic
   shotgun
   sinatra
   sinatra-contrib

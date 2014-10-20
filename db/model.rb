@@ -35,6 +35,7 @@ class Model
         insert into #{table} (#{ values_hash.keys.to_s.join(', ') })
           values (#{ values_hash.values.map { |val| DB.encode(val) }.join(', ') })
       sql
+      DB.commit
     end
 
     def schema_name
