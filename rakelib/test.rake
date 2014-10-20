@@ -31,7 +31,7 @@ namespace :test do
   desc 'AQUa projects test'
   task :aqua_projects do
     puts 'Getting project data from AQUA'
-    from = to = '02.10.2014'
+    from = to = '01.10.2014'
     projects(from, to) do |data|
       data.each do |row|
         ap row.map { |v| v[1] }.join("\t")
@@ -51,5 +51,10 @@ namespace :test do
       end
     end
     puts 'Done!'
+  end
+
+  task :project_update do
+    require 'models/ksazd/invest_project_name'
+    InvestProjectName.merge('test','test1',3)
   end
 end

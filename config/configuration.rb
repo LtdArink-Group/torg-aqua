@@ -1,5 +1,6 @@
 require 'yaml'
 require 'ostruct'
+require 'logger'
 
 module Configuration
   class << self
@@ -46,5 +47,18 @@ module Configuration
     def values
       @values ||= YAML.load_file('config/configuration.yml')
     end
+
+    def projects_logger
+      @projects_logger ||= Logger.new('log/projects.log')
+    end
+
+    def lots_logger
+      @lots_logger ||= Logger.new('log/lots.log')
+    end
+  end
+
+  at_exit do
+    Configuration.projects_logger.close
+    Configuration.lots_logger.close
   end
 end
