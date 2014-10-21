@@ -4,6 +4,6 @@ require 'db/model/lookup'
 class ProjectDepartment < Model
   extend Model::Lookup
 
-  attributes :aqua_id
-  id_field :ksazd_id
+  attributes :ksazd_id
+  id_field :aqua_id
 end

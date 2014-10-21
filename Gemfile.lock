@@ -7,6 +7,9 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
+    airbrake (4.1.0)
+      builder
+      multi_json
     akami (1.2.2)
       gyoku (>= 0.4.0)
       nokogiri
@@ -155,6 +158,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  airbrake
   awesome_print
   guard-rubocop
   pry

@@ -16,9 +16,9 @@ class DB
     end
   end
 
-  def self.exec(statement, &block)
+  def self.exec(statement, *args, &block)
     log(statement) do
-      connection.exec(statement, &block)
+      connection.exec(statement, *args, &block)
     end
   end
 

@@ -1,2 +1,3 @@
 $LOAD_PATH << '.'
-require 'models/aqua_lot'
+require 'services/projects'
+p = Projects.new

@@ -6,6 +6,7 @@ gem 'ruby-oci8'
 gem 'thin'
 gem 'savon'
 gem 'settingslogic'
+gem 'airbrake'
 
 group :development do
   gem 'rake'
