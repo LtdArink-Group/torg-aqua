@@ -5,5 +5,4 @@ Airbrake.configure do |config|
   config.host    = '172.30.47.193'
   config.port    = 666
   config.secure  = config.port == 443
-  config.logger  = Logger.new(STDOUT)
 end
