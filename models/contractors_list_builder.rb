@@ -6,7 +6,6 @@ class ContractorsListBuilder
   TYPE_RECALL     = 22002 # Тип оферты: Отзыв
   STATUS_DECLINED = 26003 # Статус оферты: Отклонена
   STATUS_WIN      = 26004 # Статус оферты: Победила
-  ZERO            = BigDecimal.new('0')
 
   attr_reader :contractors
 
@@ -47,10 +46,10 @@ class ContractorsListBuilder
         c['ZOZ'] = 'X' if offer.type_id == TYPE_RECALL
         c['ZNPP'] = 'X' if offer.absent_auction
         c['POBED'] = 'X' if offer.status_id == STATUS_WIN
-        c['ZSUM'] = offer.cost || ZERO
-        c['ZSUMWOVAT'] = offer.cost_nds || ZERO
-        c['PSUM'] = offer.final_cost || ZERO
-        c['PSUMWOVAT'] = offer.final_cost_nds || ZERO
+        c['ZSUM'] = format_cost(offer.cost)
+        c['ZSUMWOVAT'] = format_cost(offer.cost_nds)
+        c['PSUM'] = format_cost(offer.final_cost)
+        c['PSUMWOVAT'] = format_cost(offer.final_cost_nds)
         c['PERETORG'] = 'true' if offer.rebidded == 1
         c['PKOL'] = offer.rebidded
       end
@@ -62,9 +61,13 @@ class ContractorsListBuilder
       'ZNUMKSAZD' => nil, 'PARTNER_NAME' => nil, 'INN' => nil, 'KPP' => nil,
       'ALT_OFFER' => nil, 'PLANU' => nil, 'REGZP' => nil, 'PODZA' => nil,
       'OTKL' => nil, 'ZOZ' => nil, 'ZNPP' => nil, 'POBED' => nil,
-      'ZSUM' => ZERO, 'ZSUMWOVAT' => ZERO, 'PSUM' => ZERO, 'PSUMWOVAT' => ZERO,
+      'ZSUM' => '0', 'ZSUMWOVAT' => '0', 'PSUM' => '0', 'PSUMWOVAT' => '0',
       'PERETORG' => 'false', 'PKOL' => 0
     }
+  end
+
+  def format_cost(cost)
+    cost ? cost.to_s('F') : '0'
   end
 
   def plan_lot_contractors

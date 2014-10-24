@@ -20,7 +20,7 @@ namespace :test do
 
   def projects(from, to)
     require 'aqua/projects_endpoint'
-    response = ProjectsEndpoint.new(from, to)
+    response = ProjectsEndpoint.query(from, to)
     if response.status == 'S'
       yield response.data
     else
@@ -55,8 +55,24 @@ namespace :test do
     puts 'Done!'
   end
 
-  task :project_update do
-    require 'models/ksazd/invest_project_name'
-    InvestProjectName.merge('test', 'test1', 3)
+  desc 'AQUa lots test'
+  task :send_aqua_lot do
+    require 'models/aqua_lot'
+    require 'models/contractors_list_builder'
+    require 'aqua/lots_endpoint'
+    lot = AquaLot.new(343163, 819607)
+    data = lot.to_h
+    contractors = ContractorsListBuilder.new(lot).contractors
+    data[:uch_ksdazd_tab] = { item: contractors.values }
+    response = LotsEndpoint.send(i_lots: { item: data })
+    puts "#{response.status} #{response.message}"
+  end
+
+  desc 'VCR dump'
+  task :vcr_to_xml, [:name] do |t, args|
+    require 'yaml'
+    cassette = YAML.load_file("fixtures/vcr_cassettes/#{args.name}.yml")
+    request =  cassette['http_interactions'][0]['request']['body']['string']
+    IO.write("fixtures/vcr_cassettes/#{args.name}.xml", request)
   end
 end

@@ -23,7 +23,7 @@ class Projects
 
   def sync
     logger.info "Обращение к веб-сервису: запрос проектов с #{start_date} по #{yesterday}"
-    response = ProjectsEndpoint.new(start_date, yesterday)
+    response = ProjectsEndpoint.query(start_date, yesterday)
     if response.status == 'S'
       projects = select_top_level(response.data)
       merge(projects) unless projects.empty?

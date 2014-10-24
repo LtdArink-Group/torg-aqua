@@ -1,6 +1,7 @@
 require 'models/ksazd'
 require 'models/mapping'
 require 'bigdecimal'
+require 'base64'
 
 class AquaLot
   ZERO = BigDecimal.new('0')
@@ -283,7 +284,7 @@ class AquaLot
   end
 
   def format_guid(guid)
-    guid.bytes.map { |b| format('%02X', b) }.join if guid
+    Base64.encode64(guid).chop if guid
   end
 
   def format_cost(cost)
