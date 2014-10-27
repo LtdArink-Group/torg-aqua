@@ -36,7 +36,7 @@ class Projects
 
   private
 
-  VARIABLE_KEY = 'project.processed_date'
+  VARIABLE_KEY = 'processed_date.project'
   NO_MATCH_DEPART = 'Не удалось найти заказчика КСАЗД для id: '
 
   def select_top_level(projects)
