@@ -2,17 +2,17 @@ require 'oci8'
 require 'config/configuration'
 
 class DB
-  def self.query_value(query)
-    exec(query).fetch[0]
+  def self.query_value(query, *args)
+    exec(query, *args).fetch[0]
   end
 
-  def self.query_first_row(query)
-    exec(query).fetch
+  def self.query_first_row(query, *args)
+    exec(query, *args).fetch
   end
 
-  def self.query_all(query)
+  def self.query_all(query, *args)
     [].tap do |a|
-      exec(query) { |r| a << r }
+      exec(query, *args) { |r| a << r }
     end
   end
 

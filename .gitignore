@@ -1,3 +1,4 @@
 .bundle/
 config/configuration.yml
 log/
+fixtures/

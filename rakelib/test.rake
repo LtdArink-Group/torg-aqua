@@ -4,18 +4,18 @@ require 'pp'
 namespace :test do
   desc 'Aqua lot test'
   task :aqua_lot do
-    require 'models/aqua_lot'
-    lot = AquaLot.new(343163, 819607)
-    ap lot.to_h
+    require 'models/aqua_lot_builder'
+    lot_builder = AquaLotBuilder.new(343163, 819607)
+    ap lot_builder.to_h
   end
 
   desc 'Contractors list test'
   task :contractors_list do
-    require 'models/aqua_lot'
+    require 'models/aqua_lot_builder'
     require 'models/contractors_list_builder'
-    lot = AquaLot.new(343163, 819607)
-    builder = ContractorsListBuilder.new(lot)
-    ap builder.contractors
+    lot_builder = AquaLotBuilder.new(343163, 819607)
+    contractors_builder = ContractorsListBuilder.new(lot_builder)
+    ap contractors_builder.contractors
   end
 
   def projects(from, to)
@@ -55,17 +55,28 @@ namespace :test do
     puts 'Done!'
   end
 
-  desc 'AQUa lots test'
+  desc 'Send AQUa lots test'
   task :send_aqua_lot do
-    require 'models/aqua_lot'
+    require 'models/aqua_lot_builder'
     require 'models/contractors_list_builder'
     require 'aqua/lots_endpoint'
-    lot = AquaLot.new(343163, 819607)
-    data = lot.to_h
-    contractors = ContractorsListBuilder.new(lot).contractors
+    # require 'webmock'
+    # require 'vcr'
+
+    # VCR.configure do |c|
+    #   c.cassette_library_dir = 'fixtures/vcr_cassettes'
+    #   c.hook_into :webmock # or :fakeweb
+    # end
+
+    lot_builder = AquaLotBuilder.new(343163, 819607)
+    data = lot_builder.to_h
+    contractors = ContractorsListBuilder.new(lot_builder).contractors
     data[:uch_ksdazd_tab] = { item: contractors.values }
     response = LotsEndpoint.send(i_lots: { item: data })
-    puts "#{response.status} #{response.message}"
+    # VCR.use_cassette('lots') do
+      puts "response status: #{response.status}"
+      puts response.message if response.message
+    # end
   end
 
   desc 'VCR dump'
@@ -74,5 +85,11 @@ namespace :test do
     cassette = YAML.load_file("fixtures/vcr_cassettes/#{args.name}.yml")
     request =  cassette['http_interactions'][0]['request']['body']['string']
     IO.write("fixtures/vcr_cassettes/#{args.name}.xml", request)
+  end
+
+  desc 'Monitor lots test'
+  task :monitor_lots do
+    require 'services/new_lots'
+    NewLots.process
   end
 end

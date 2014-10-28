@@ -25,6 +25,7 @@ class Projects
     logger.info "Обращение к веб-сервису: запрос проектов с #{start_date} по #{yesterday}"
     response = ProjectsEndpoint.query(start_date, yesterday)
     if response.status == 'S'
+      logger.info "Получено проектов: #{response.data.size}"
       projects = select_top_level(response.data)
       merge(projects) unless projects.empty?
     else
@@ -39,18 +40,24 @@ class Projects
   VARIABLE_KEY = 'processed_date.project'
   NO_MATCH_DEPART = 'Не удалось найти заказчика КСАЗД для id: '
 
+  def start_date
+    @start_date ||= format_date(processed_date + 1)
+  end
+
+  def yesterday
+    format_date(Date.today - 1)
+  end
+
   def select_top_level(projects)
     projects.select { |p| p[:spp_parent].nil? }
   end
 
   def merge(projects)
-    count = 0
     projects.each do |project|
       InvestProjectName.merge(*params(project))
-      count += 1
     end
     self.processed_date = yesterday
-    logger.info "Обработано проектов: #{count}"
+    logger.info "Обработано проектов: #{projects.size}"
   end
 
   def params(project)
@@ -65,10 +72,6 @@ class Projects
     ProjectDepartment.lookup(aqua_id) or fail NO_MATCH_DEPART + aqua_id.to_s
   end
 
-  def start_date
-    @start_date ||= format_date(processed_date + 1)
-  end
-
   def processed_date
     if date = AppVariable.lookup(VARIABLE_KEY)
       Date.strptime(date, '%d.%m.%Y')
@@ -79,10 +82,6 @@ class Projects
 
   def processed_date=(date)
     AppVariable.merge(VARIABLE_KEY, date)
-  end
-
-  def yesterday
-    format_date(Date.today - 1)
   end
 
   def error(message)
