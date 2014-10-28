@@ -5,6 +5,18 @@ class Query
 
   attr_reader :data
 
+  class << self
+    attr_reader :descendants
+
+    def inherited(subclass)
+      if @descendants
+        @descendants << subclass
+      else
+        @descendants = [subclass]
+      end
+    end
+  end
+
   def initialize
     @data = changed_data
   end
