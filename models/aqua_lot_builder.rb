@@ -116,7 +116,7 @@ class AquaLotBuilder
       # ОКЕИ
       'OKEI' => plan_spec.unit_id,
       # ОКАТО
-      'OKATO' => okato,
+      'OKATO' => okato[0,8],
       # Код по ОКВЭД
       'ZOKVED' => plan_spec.okved_id,
       # Код по ОКДП
@@ -279,8 +279,8 @@ class AquaLotBuilder
     end
   end
 
-  def format_date(date)
-    date.strftime '%d.%m.%Y' if date
+  def format_date(time)
+    time.to_date if time
   end
 
   def format_guid(guid)

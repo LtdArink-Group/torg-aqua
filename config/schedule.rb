@@ -1,4 +1,5 @@
 env :PATH, ENV['PATH']
+env :NLS_LANG, 'RUSSIAN_CIS.AL32UTF8'
 
 job_type :runner, 'cd :path && nice -19 bundle exec rake :task --silent :output'
 
