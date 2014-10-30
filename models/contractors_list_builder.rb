@@ -25,7 +25,7 @@ class ContractorsListBuilder
   def load_plan_contractors
     plan_lot_contractors.each do |contractor|
       contractors[contractor.id].tap do |c|
-        c['ZNUMKSAZD'] = contractor.id
+        c['ZNUMC1C'] = contractor.id
         c['PARTNER_NAME'] = contractor.fullname
         c['INN'] = contractor.inn
         c['KPP'] = contractor.kpp
@@ -37,7 +37,7 @@ class ContractorsListBuilder
   def load_exec_contractors
     lot_offers.each do |offer|
       contractors[offer.contractor_id].tap do |c|
-        c['ZNUMKSAZD'] = offer.contractor.id
+        c['ZNUMC1C'] = offer.contractor.id
         c['PARTNER_NAME'] = offer.contractor.fullname
         c['INN'] = offer.contractor.inn
         c['KPP'] = offer.contractor.kpp
@@ -58,9 +58,9 @@ class ContractorsListBuilder
 
   def default_contractor
     {
-      'ZNUMKSAZD' => nil, 'PARTNER_NAME' => nil, 'INN' => nil, 'KPP' => nil,
-      'ALT_OFFER' => nil, 'PLANU' => nil, 'REGZP' => nil, 'PODZA' => nil,
-      'OTKL' => nil, 'ZOZ' => nil, 'ZNPP' => nil, 'POBED' => nil,
+      'ZNUMC1C' => '', 'PARTNER_NAME' => '', 'INN' => '', 'KPP' => '',
+      'ALT_OFFER' => '', 'PLANU' => '', 'REGZP' => '', 'PODZA' => '',
+      'OTKL' => '', 'ZOZ' => '', 'ZNPP' => '', 'POBED' => '',
       'ZSUM' => '0', 'ZSUMWOVAT' => '0', 'PSUM' => '0', 'PSUMWOVAT' => '0',
       'PERETORG' => 'false', 'PKOL' => 0
     }

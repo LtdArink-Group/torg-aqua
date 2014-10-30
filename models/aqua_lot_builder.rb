@@ -32,18 +32,22 @@ class AquaLotBuilder
 
   def to_h
     {
-      # Номер лота из КСАЗД (планирование)
-      'ZNUMKSAZDP' => format_guid(plan_spec.guid),
-      # Номер лота из КСАЗД (исполнение)
-      'ZNUMKSAZDF' => exec_spec_id,
       # Финансовый год
       'GJAHR' => plan_lot.gkpz_year,
       # Орг.единица
       'ZZCUSTOMER_ID' => customer,
       # Идентификатор (Состояние в ГКПЗ: План / Внеплан)
       'OBJECT_TYPE' => lot_state,
+      # Статус
+      'STATUS' => IN_PROGRESS,
       # Раздел ГКПЗ 
       'FUNBUD' => Direction.lookup(plan_spec.direction_id),
+      # Код валюты
+      'WAERS' => RUSSIAN_RUBLE,
+      # Внутренний номер инвестиционного проекта
+
+      'SPP' => 'T-4070-00083', # TODO: replace with real one from KSAZD
+
       # Название лота
       'LNAME' => plan_spec.name,
       # Номер лота
@@ -59,9 +63,9 @@ class AquaLotBuilder
       # Способ закупки (план)
       'SPZKP' => TenderType.lookup(plan_lot.tender_type_id),
       # Способ закупки (по способу объявления)
-      'SPZKF' => TenderType.lookup(last_tender.tender_type_id),
+      'SPZKF' => TenderType.lookup(last_tender.tender_type_id) || '',
       # Способ закупки (ЕИ по итогам конкурентных процедур)
-      'SPZEI' => last_lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : nil,
+      'SPZEI' => last_lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
       # Планируемая цена лота (руб. с НДС)
       'SUMN' => format_cost(plan_spec.cost_nds),
       # Планируемая цена лота (руб. без  НДС)
@@ -93,7 +97,7 @@ class AquaLotBuilder
       # Использование электронной торговой площадки b2b.enegro План
       'B2BF' => EtpAddress.lookup(last_tender.etp_address_id),
       # Подразделение - куратор закупки
-      'ZKURATOR' => MonitorService.lookup(plan_spec.monitor_service_id),
+      'ZKURATOR' => zkurator,
       # Дата начала поставки товаров, выполнения работ, услуг
       'DATENP' => format_date(plan_spec.delivery_date_begin),
       # Дата окончания поставки товаров, выполнения работ, услуг
@@ -103,18 +107,18 @@ class AquaLotBuilder
       # Технический куратор
       'TKURATOR' => plan_spec.tech_curator,
       # Подраздел ГКПЗ
-      'LOT_FUNBUD' => Subdirection.lookup(plan_spec.direction_id,
-                                          plan_lot.subject_type_id),
+      'L_FUNBUD' => Subdirection.lookup(plan_spec.direction_id,
+                                        plan_lot.subject_type_id),
       # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
-      'P_REASON' => plan_lot.tender_type_explanations,
+      'P_REASON' => plan_lot.tender_type_explanations || '-',
       # Обоснование (документ)
-      'P_REASON_DOC' => plan_lot.explanations_doc,
+      'P_REASON_DOC' => plan_lot.explanations_doc || '-',
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
       'ZEI' => plan_spec.qty,
       # ОКЕИ
-      'OKEI' => plan_spec.unit_id,
+      'OKEI' => Unit.lookup(plan_spec.unit_id),
       # ОКАТО
       'OKATO' => okato[0,8],
       # Код по ОКВЭД
@@ -129,11 +133,15 @@ class AquaLotBuilder
       # Реквизиты протокола ЦЗК в случае отмены закупки
       'PRN1' => prn1,
       # Причины невыполнения срока заключения договора
-      'PRN2' => last_lot.non_contract_reason,
+      'PRN2' => last_lot.non_contract_reason || '',
       # Код валюты
-      'WAERS' => RUSSIAN_RUBLE,
+      'L_WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
-      'ZNUMPR' => last_tender.etp_num,
+      'ZNUMPR' => last_tender.etp_num || '',
+      # Номер лота из КСАЗД (планирование)
+      'ZNUMKSAZDP' => format_guid(plan_spec.guid),
+      # Номер лота из КСАЗД (исполнение)
+      'ZNUMKSAZDF' => exec_spec_id || '',
       # Планируемый объем обязательств (финансирование с НДС)
       'FINSN5Y1' => format_cost(plan_spec_amounts[0][0]),
       'FINSN5Y2' => format_cost(plan_spec_amounts[1][0]),
@@ -178,13 +186,19 @@ class AquaLotBuilder
   end
 
   def comission
-    return unless plan_lot.commission_id
+    return '' unless plan_lot.commission_id
     type_id = Commission.find(plan_lot.commission_id).commission_type_id
     CommissionType.lookup(type_id)
   end
 
+  def zkurator
+    value = MonitorService.lookup(plan_spec.monitor_service_id)
+    sprintf("%03d", value)
+  end
+
   def paragraph
-    "00#{num}" if num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
+    num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
+    num ? "00#{num}" : '-'
   end
 
   def prn1
@@ -280,11 +294,11 @@ class AquaLotBuilder
   end
 
   def format_date(time)
-    time.to_date if time
+    time ? time.to_date : ''
   end
 
   def format_guid(guid)
-    Base64.encode64(guid).chop if guid
+    guid ? Base64.encode64(guid).chop : ''
   end
 
   def format_cost(cost)
@@ -317,7 +331,7 @@ class AquaLotBuilder
   end
 
   def additional_to
-    return nil unless plan_lot.additional_to
+    return '' unless plan_lot.additional_to
     DB.query_value(<<-sql)
       select distinct s.guid
         from ksazd.plan_specifications s

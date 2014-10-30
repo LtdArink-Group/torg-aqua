@@ -7,7 +7,8 @@ class ProjectsEndpoint
 
   def initialize(from, to)
     config = Configuration.soap.project
-    @params = { iv_date_fr: from, iv_date_to: to, iv_syst_id: config.system }
+    @params = { 'IV_DATE_FR' => from, 'IV_DATE_TO' => to,
+                'IV_SYST_ID' => config.system }
     @client = SoapClient.new(config.wsdl, config.login, config.password)
   end
 

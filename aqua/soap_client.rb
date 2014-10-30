@@ -22,7 +22,6 @@ class SoapClient
     options = {}.tap do |o|
       o.merge! proxy: Configuration.soap.proxy if Configuration.soap.proxy
     end
-    options.merge(wsdl: wsdl, basic_auth: [login, password],
-                  convert_request_keys_to: :upcase)
+    options.merge(wsdl: wsdl, basic_auth: [login, password])
   end
 end

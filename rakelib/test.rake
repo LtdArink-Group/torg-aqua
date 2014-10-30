@@ -71,8 +71,8 @@ namespace :test do
     lot_builder = AquaLotBuilder.new(343163, 819607)
     data = lot_builder.to_h
     contractors = ContractorsListBuilder.new(lot_builder).contractors
-    data[:uch_ksdazd_tab] = { item: contractors.values }
-    response = LotsEndpoint.send(i_lots: { item: data })
+    data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
+    response = LotsEndpoint.send('I_LOTS' => { 'item' => data })
     # VCR.use_cassette('lots') do
       puts "response status: #{response.status}"
       puts response.message if response.message
