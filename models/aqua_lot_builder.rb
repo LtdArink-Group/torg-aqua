@@ -20,7 +20,7 @@ class AquaLotBuilder
   TENDER_COMPLETED = 2     # Закупка проведена
   AQUA_DZO         = 'DZO' # Организатор процедуры (по умолчанию)
   AQUA_EI          = 'EI'  # Способ закупки ЕИ
-  INVESTMENTS      = 1     # Инвестиционные средства
+  INVESTMENTS      = '001' # Инвестиционные средства
   OTHER            = 4     # Раздел контрактного пакета "Прочее"
   RUSSIAN_RUBLE    = 'RUB' # Код валюты
 
@@ -110,9 +110,9 @@ class AquaLotBuilder
       'L_FUNBUD' => Subdirection.lookup(plan_spec.direction_id,
                                         plan_lot.subject_type_id),
       # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
-      'P_REASON' => plan_lot.tender_type_explanations || '-',
+      'P_REASON' => plan_lot.tender_type_explanations || '',
       # Обоснование (документ)
-      'P_REASON_DOC' => plan_lot.explanations_doc || '-',
+      'P_REASON_DOC' => plan_lot.explanations_doc || '',
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
@@ -122,9 +122,9 @@ class AquaLotBuilder
       # ОКАТО
       'OKATO' => okato[0,8],
       # Код по ОКВЭД
-      'ZOKVED' => plan_spec.okved_id,
+      'ZOKVED' => OKVED.lookup(plan_spec.okved_id),
       # Код по ОКДП
-      'ZOKDP' => plan_spec.okdp_id,
+      'ZOKPD' => OKDP.lookup(plan_spec.okdp_id),
       # Мин. необходимые требования, предъявляемые к закупаеой продукции
       'ZMTREB' => plan_spec.requirements,
       # Раздел контрактного пакета
@@ -198,7 +198,7 @@ class AquaLotBuilder
 
   def paragraph
     num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
-    num ? "00#{num}" : '-'
+    num ? "00#{num}" : ''
   end
 
   def prn1

@@ -13,6 +13,10 @@ class Model
       @schema = symbol.to_s
     end
 
+    def tablename(symbol)
+      @tablename = symbol.to_s
+    end
+
     def id_field(symbol)
       @id_fields = [symbol.to_s]
     end
@@ -51,7 +55,7 @@ class Model
     end
 
     def table
-      schema_name + table_name + table_suffix
+      schema_name + (@tablename || table_name + table_suffix)
     end
   end
 

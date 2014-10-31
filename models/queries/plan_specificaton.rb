@@ -16,6 +16,7 @@ class PlanSpecification < Query
           and p.id = pl.protocol_id
           and pl.id = ps.plan_lot_id
           and ps.direction_id = d.ksazd_id
+          --
           and pl.status_id in (#{plan_statuses})
           and pl.gkpz_year >= #{START_YEAR}
           and ps.updated_at > :max_time
