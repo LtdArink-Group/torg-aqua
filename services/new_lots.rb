@@ -14,7 +14,6 @@ class NewLots
   end
 
   def process
-    logger.info '==== Обработка новых лотов ===='
     detect_changes
     update_aqua
   rescue Exception => e
@@ -26,6 +25,7 @@ class NewLots
   private
 
   def detect_changes
+    logger.info 'Обнаружение изменившихся данных'
     Query.descendants.each { |klass| detect_changes_for(klass) }
   end
 
@@ -34,10 +34,9 @@ class NewLots
     query.data.each do |lot|
       AquaLot.new(*lot[0, 2]).pending
     end
-    unless query.data.empty?
-      logger.info "  #{klass}: #{query.data.size}"
-      query.save_maximum_time
-    end
+    return if query.data.empty?
+    logger.info "  #{klass}: #{query.data.size}"
+    query.save_maximum_time
   end
 
   def update_aqua

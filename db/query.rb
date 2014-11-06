@@ -2,6 +2,7 @@ require 'models/app_variable'
 
 class Query
   UPDATED_AT_INDEX = 2
+  START_YEAR = Configuration.integration.lot.start_year
 
   attr_reader :data
 
@@ -15,6 +16,14 @@ class Query
         @descendants = [subclass]
       end
     end
+
+    def commission_types
+      Configuration.integration.lot.commission_types.join(',')
+    end
+
+    def plan_statuses
+      Configuration.integration.lot.plan_statuses.join(',')
+    end
   end
 
   def initialize
@@ -27,14 +36,8 @@ class Query
 
   private
 
-  START_YEAR = Configuration.integration.lot.start_year
-
-  def commission_types
-    Configuration.integration.lot.commission_types.join(',')
-  end
-
-  def plan_statuses
-    Configuration.integration.lot.plan_statuses.join(',')
+  def changed_data
+    DB.query_all(changed_data_sql, maximum_modified_time)
   end
 
   def variable_key
