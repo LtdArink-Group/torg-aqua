@@ -1,12 +1,6 @@
 require 'config/airbrake'
 
 namespace :integration do
-  desc 'Corn test'
-  task :cron_test do
-    require 'services/loggers'
-    Loggers.projects_logger.info 'cron test'
-  end
-
   desc 'AQUa projects update'
   task :projects do
     require 'services/projects'

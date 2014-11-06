@@ -25,7 +25,7 @@ class Projects
     logger.info "Обращение к веб-сервису: запрос проектов с #{start_date} по #{yesterday}"
     response = ProjectsEndpoint.query(start_date, yesterday)
     if response.status == 'S'
-      logger.info "Получено проектов: #{response.data.size}"
+      logger.info "  Получено проектов: #{response.data.size}"
       projects = select_top_level(response.data)
       merge(projects) unless projects.empty?
     else
@@ -57,7 +57,7 @@ class Projects
       InvestProjectName.merge(*params(project))
     end
     self.processed_date = yesterday
-    logger.info "Обработано проектов: #{projects.size}"
+    logger.info "  Обработано проектов: #{projects.size}"
   end
 
   def params(project)
@@ -86,7 +86,7 @@ class Projects
 
   def error(message)
     if message == 'За заданный период нет проектов'
-      logger.info 'Нет изменений по проектам'
+      logger.info '  Нет изменений по проектам'
     else
       logger.error message
     end

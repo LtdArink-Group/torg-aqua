@@ -1,4 +1,4 @@
 .bundle/
 config/configuration.yml
-log/
+log/*.log
 fixtures/

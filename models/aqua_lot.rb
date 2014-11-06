@@ -6,13 +6,13 @@ class AquaLot < Model
     CONSISTENT = 'C'
   end
 
-  def initialize(plan_spec_guid, exec_spec_id)
+  def initialize(plan_spec_guid, exec_spec_guid)
     @plan_spec_guid = format_guid(plan_spec_guid)
-    @exec_spec_id = exec_spec_id
+    @exec_spec_guid = exec_spec_guid
   end
 
   def pending
-    if exec_spec_id
+    if exec_spec_guid
       pending_with_exec_spec_id
     else
       pending_without_exec_spec_id
@@ -21,7 +21,7 @@ class AquaLot < Model
 
   private
 
-  attr_reader :plan_spec_guid, :exec_spec_id
+  attr_reader :plan_spec_guid, :exec_spec_guid
 
   def format_guid(guid)
     guid.bytes.map { |b| sprintf('%02X', b) }.join
@@ -44,32 +44,32 @@ class AquaLot < Model
       select count(*)
         from #{table}
         where plan_spec_guid = :guid
-          and exec_spec_id is null
+          and exec_spec_guid is null
     sql
   end
 
   def update_pending_with_exec_spec_id
-    puts "update_pending_with_exec_spec_id #{plan_spec_guid}, #{exec_spec_id}"
-    DB.exec(<<-sql, exec_spec_id, plan_spec_guid)
+    puts "update_pending_with_exec_spec_id #{plan_spec_guid}, #{exec_spec_guid}"
+    DB.exec(<<-sql, exec_spec_guid, plan_spec_guid)
       update #{table}
-        set exec_spec_id = :id, state = '#{State::PENDING}'
+        set exec_spec_guid = :id, state = '#{State::PENDING}'
         where plan_spec_guid = hextoraw(:guid)
     sql
     DB.commit
   end
 
   def merge_pending_with_exec_spec_id
-    puts "merge_pending_with_exec_spec_id #{plan_spec_guid}, #{exec_spec_id}"
-    DB.exec(<<-sql, plan_spec_guid, exec_spec_id)
+    puts "merge_pending_with_exec_spec_id #{plan_spec_guid}, #{exec_spec_guid}"
+    DB.exec(<<-sql, plan_spec_guid, exec_spec_guid)
       merge into #{table} t using
-      (select hextoraw(:guid) plan_spec_guid, :id exec_spec_id from dual) s
+      (select hextoraw(:guid) plan_spec_guid, :id exec_spec_guid from dual) s
       on (t.plan_spec_guid = s.plan_spec_guid and
-          t.exec_spec_id = s.exec_spec_id)
+          t.exec_spec_guid = s.exec_spec_guid)
       when matched then
         update set state = '#{State::PENDING}'
       when not matched then
-        insert (id, plan_spec_guid, exec_spec_id, state)
-        values (#{table}_seq.nextval, s.plan_spec_guid, s.exec_spec_id,
+        insert (id, plan_spec_guid, exec_spec_guid, state)
+        values (#{table}_seq.nextval, s.plan_spec_guid, s.exec_spec_guid,
                '#{State::PENDING}')
     sql
     DB.commit
@@ -88,7 +88,7 @@ class AquaLot < Model
       select count(*)
         from #{table}
         where plan_spec_guid = hextoraw(:guid)
-          and exec_spec_id is not null
+          and exec_spec_guid is not null
     sql
   end
 
