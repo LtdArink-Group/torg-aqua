@@ -149,17 +149,17 @@ class AquaLotBuilder
       'FINSN5Y4' => format_cost(plan_spec_amounts[3][0]),
       'FINSN5Y5' => format_cost(plan_spec_amounts[4][0]),
       # Планируемая сумма освоения (без НДС)
-      'ODVBN5Y1' => format_cost(plan_spec_amounts[0][1]),
-      'ODVBN5Y2' => format_cost(plan_spec_amounts[1][1]),
-      'ODVBN5Y3' => format_cost(plan_spec_amounts[2][1]),
-      'ODVBN5Y4' => format_cost(plan_spec_amounts[3][1]),
-      'ODVBN5Y5' => format_cost(plan_spec_amounts[4][1]),
+      'OSVBN5Y1' => format_cost(plan_spec_amounts[0][1]),
+      'OSVBN5Y2' => format_cost(plan_spec_amounts[1][1]),
+      'OSVBN5Y3' => format_cost(plan_spec_amounts[2][1]),
+      'OSVBN5Y4' => format_cost(plan_spec_amounts[3][1]),
+      'OSVBN5Y5' => format_cost(plan_spec_amounts[4][1]),
       # Планируемая сумма освоения (с НДС)
-      'ODVSN5Y1' => format_cost(plan_spec_amounts[0][2]),
-      'ODVSN5Y2' => format_cost(plan_spec_amounts[1][2]),
-      'ODVSN5Y3' => format_cost(plan_spec_amounts[2][2]),
-      'ODVSN5Y4' => format_cost(plan_spec_amounts[3][2]),
-      'ODVSN5Y5' => format_cost(plan_spec_amounts[4][2])
+      'OSVSN5Y1' => format_cost(plan_spec_amounts[0][2]),
+      'OSVSN5Y2' => format_cost(plan_spec_amounts[1][2]),
+      'OSVSN5Y3' => format_cost(plan_spec_amounts[2][2]),
+      'OSVSN5Y4' => format_cost(plan_spec_amounts[3][2]),
+      'OSVSN5Y5' => format_cost(plan_spec_amounts[4][2])
     }
   end
 
