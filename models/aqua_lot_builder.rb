@@ -120,7 +120,7 @@ class AquaLotBuilder
       # ОКЕИ
       'OKEI' => Unit.lookup(plan_spec.unit_id),
       # ОКАТО
-      'OKATO' => okato[0,8],
+      'OKATO' => okato[0, 8],
       # Код по ОКВЭД
       'ZOKVED' => OKVED.lookup(plan_spec.okved_id),
       # Код по ОКДП

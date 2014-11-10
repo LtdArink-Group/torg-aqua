@@ -13,8 +13,9 @@ soap:
     login: login
     password: password
     system: '07'
-intgration:
+integration:
   lot:
+    timeout: 60 # in minutes
     start_year: 2014
     start_time: 2013-01-01T00:00:00.0Z
     commission_types: [28004, 28005]

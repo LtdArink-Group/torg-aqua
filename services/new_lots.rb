@@ -1,10 +1,11 @@
 require 'models/queries'
 require 'models/aqua_lot'
 require 'services/loggers'
+require 'services/syncronizer'
 
 class NewLots
   def self.process
-    new.process
+    Syncronizer.perform { new.process }
   end
 
   attr_reader :logger
