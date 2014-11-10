@@ -24,10 +24,10 @@ class AquaLotBuilder
   OTHER            = 4     # Раздел контрактного пакета "Прочее"
   RUSSIAN_RUBLE    = 'RUB' # Код валюты
 
-  attr_reader :plan_spec_id, :exec_spec_id
+  attr_reader :plan_spec_guid, :spec_guid
 
-  def initialize(plan_spec_id, exec_spec_id)
-    @plan_spec_id, @exec_spec_id = plan_spec_id, exec_spec_id
+  def initialize(plan_spec_guid, spec_guid)
+    @plan_spec_guid, @spec_guid = plan_spec_guid, spec_guid
   end
 
   def to_h
@@ -63,9 +63,9 @@ class AquaLotBuilder
       # Способ закупки (план)
       'SPZKP' => TenderType.lookup(plan_lot.tender_type_id),
       # Способ закупки (по способу объявления)
-      'SPZKF' => TenderType.lookup(last_tender.tender_type_id) || '',
+      'SPZKF' => TenderType.lookup(tender.tender_type_id) || '',
       # Способ закупки (ЕИ по итогам конкурентных процедур)
-      'SPZEI' => last_lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
+      'SPZEI' => lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
       # Планируемая цена лота (руб. с НДС)
       'SUMN' => format_cost(plan_spec.cost_nds),
       # Планируемая цена лота (руб. без  НДС)
@@ -75,13 +75,13 @@ class AquaLotBuilder
       # Дата объявления конкурсных процедур. План
       'DATEPK' => format_date(plan_lot.announce_date),
       # Дата вскрытия конвертов. План
-      'DATEPV' => format_date(last_tender.bid_date),
+      'DATEPV' => format_date(tender.bid_date),
       # Дата подведения итогов конкурса. План
-      'DATEPI' => format_date(last_tender.summary_date),
+      'DATEPI' => format_date(tender.summary_date),
       # Дата заключения договора с победителем конкурса. План
       'DATEPD' => format_date(nil),
       # Дата объявления конкурсных процедур. Факт
-      'DATEFK' => format_date(last_tender.announce_date),
+      'DATEFK' => format_date(tender.announce_date),
       # Дата вскрытия конвертов. Факт
       'DATEFV' => format_date(open_protocol.open_date),
       # Дата подведения итогов конкурса. Факт
@@ -95,7 +95,7 @@ class AquaLotBuilder
       # Использование электронной торговой площадки b2b.enegro План
       'B2BP' => EtpAddress.lookup(plan_lot.etp_address_id),
       # Использование электронной торговой площадки b2b.enegro План
-      'B2BF' => EtpAddress.lookup(last_tender.etp_address_id),
+      'B2BF' => EtpAddress.lookup(tender.etp_address_id),
       # Подразделение - куратор закупки
       'ZKURATOR' => zkurator,
       # Дата начала поставки товаров, выполнения работ, услуг
@@ -133,15 +133,15 @@ class AquaLotBuilder
       # Реквизиты протокола ЦЗК в случае отмены закупки
       'PRN1' => prn1,
       # Причины невыполнения срока заключения договора
-      'PRN2' => last_lot.non_contract_reason || '',
+      'PRN2' => lot.non_contract_reason || '',
       # Код валюты
       'L_WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
-      'ZNUMPR' => last_tender.etp_num || '',
+      'ZNUMPR' => tender.etp_num || '',
       # Номер лота из КСАЗД (планирование)
       'ZNUMKSAZDP' => format_guid(plan_spec.guid),
       # Номер лота из КСАЗД (исполнение)
-      'ZNUMKSAZDF' => exec_spec_id || '',
+      'ZNUMKSAZDF' => spec_id || '',
       # Планируемый объем обязательств (финансирование с НДС)
       'FINSN5Y1' => format_cost(plan_spec_amounts[0][0]),
       'FINSN5Y2' => format_cost(plan_spec_amounts[1][0]),
@@ -163,10 +163,6 @@ class AquaLotBuilder
     }
   end
 
-  def plan_lot_id
-    plan_spec.plan_lot_id
-  end
-
   private
 
   # hash values -----------------------------------------------------
@@ -178,7 +174,7 @@ class AquaLotBuilder
   end
 
   def lotstatus
-    if @exec_spec_id && last_lot.status_id == CONTRACT_DONE
+    if @spec_id && lot.status_id == CONTRACT_DONE
       TENDER_COMPLETED
     else
       IN_PROGRESS
@@ -203,7 +199,7 @@ class AquaLotBuilder
 
   def prn1
     [].tap do |a|
-      if reason = last_lot.non_public_reason
+      if reason = lot.non_public_reason
         a << reason
       end
       if id = plan_lot.protocol_id
@@ -214,50 +210,41 @@ class AquaLotBuilder
 
   # entities --------------------------------------------------------
 
-  def plan_lot
-    @plan_lot ||= PlanLot.find(plan_spec.plan_lot_id)
-  end
-
   def plan_spec
     @plan_spec ||= PlanSpecification.find(plan_spec_id)
   end
 
-  def exec_spec
-    @exec_spec ||= Specification.find(exec_spec_id)
+  def plan_lot
+    @plan_lot ||= PlanLot.find(plan_spec.plan_lot_id)
   end
 
-  def exec_lots
-    @exec_lots ||= [].tap do |lots|
-      lots << Lot.find(exec_spec.lot_id)
-      while (next_id = lots.last.next_id)
-        lots << Lot.find(next_id)
-      end
-    end
+  def spec
+    @spec ||= Specification.find(spec_id)
   end
 
-  def last_lot
-    return NullLot.new unless exec_spec_id
-    @last_lot ||= exec_lots.last
+  def lot
+    return NullLot.new unless spec_id
+    @lot ||= Lot.find(spec.lot_id)
   end
 
-  def last_tender
-    return NullTender.new unless exec_spec_id
-    @last_tender ||= Tender.find(last_lot.tender_id)
+  def tender
+    return NullTender.new unless spec_id
+    @tender ||= Tender.find(lot.tender_id)
   end
 
   def open_protocol
-    return NullOpenProtocol.new unless exec_spec_id
-    OpenProtocol.find(last_lot.tender_id) || NullOpenProtocol.new
+    return NullOpenProtocol.new unless spec_id
+    OpenProtocol.find(lot.tender_id) || NullOpenProtocol.new
   end
 
   def winner_protocol
-    return NullWinnerProtocol.new unless exec_spec_id
-    WinnerProtocol.find(last_lot.winner_protocol_id) || NullWinnerProtocol.new
+    return NullWinnerProtocol.new unless spec_id
+    WinnerProtocol.find(lot.winner_protocol_id) || NullWinnerProtocol.new
   end
 
   def contract
-    return NullContract.new unless exec_spec_id
-    Contract.find(last_lot.id) || NullContract.new
+    return NullContract.new unless spec_id
+    Contract.find(lot.id) || NullContract.new
   end
 
   # helpers ---------------------------------------------------------
@@ -307,56 +294,114 @@ class AquaLotBuilder
 
   # data access -----------------------------------------------------
 
+  class << self
+    def commission_types
+      Configuration.integration.lot.commission_types.join(',')
+    end
+
+    def plan_statuses
+      Configuration.integration.lot.plan_statuses.join(',')
+    end
+  end
+
+  PLAN_SPEC_SQL = <<-sql
+    select max(ps.id)
+      from ksazd.protocols p,
+           ksazd.commissions c,
+           ksazd.plan_lots pl,
+           ksazd.plan_specifications ps
+      where p.commission_id = c.id
+        and p.id = pl.protocol_id
+        and pl.id = ps.plan_lot_id
+        --
+        and c.commission_type_id in (#{commission_types})
+        and pl.status_id in (#{plan_statuses})
+        and ps.guid = hextoraw(:guid)
+      group by ps.guid
+  sql
+
+  def plan_spec_id
+    @plan_spec_id ||= DB.query_value(PLAN_SPEC_SQL, plan_spec_guid).to_i
+  end
+
+  SPEC_FROM_PLAN_SQL = <<-sql
+    select s.id
+      from ksazd.specifications s,
+           ksazd.lots l
+      where s.lot_id = l.id
+        and l.next_id is null
+        and s.plan_specification_id = :plan_spec_id
+  sql
+
+  SPEC_FROM_SQL = <<-sql
+    select s.id
+      from ksazd.specifications s,
+           ksazd.lots l
+      where s.lot_id = l.id
+        and l.next_id is null
+        and s.guid = :guid
+  sql
+
+  def spec_id
+    @spec_id ||= begin
+      if spec_guid
+        DB.query_value(SPEC_FROM_SQL, spec_guid).to_i
+      else
+        DB.query_value(SPEC_FROM_PLAN_SQL, plan_spec_id).to_i
+      end
+    end
+  end
+
   def main_lot_cost
-    DB.query_value(<<-sql)
+    DB.query_value(<<-sql, plan_lot.additional_to)
       select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
-          and l.guid = '#{plan_lot.additional_to}'
+          and l.guid = hextoraw(:guid)
           and l.version = 0
     sql
   end
 
   def additional_cost_sum
-    DB.query_value(<<-sql)
+    DB.query_value(<<-sql, plan_lot.additional_to, plan_lot.additional_num)
       select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
-          and l.additional_to = #{plan_lot.additional_to}
-          and l.additional_num <= #{plan_lot.additional_num}
+          and l.additional_to = hextoraw(:guid)
+          and l.additional_num <= :num
           and l.version = 0
     sql
   end
 
   def additional_to
     return '' unless plan_lot.additional_to
-    DB.query_value(<<-sql)
+    DB.query_value(<<-sql, plan_spec.direction_id, plan_spec.plan_lot_id)
       select distinct s.guid
         from ksazd.plan_specifications s
-        where s.direction_id = #{plan_spec.direction_id}
-          and s.plan_lot_id = #{plan_spec.plan_lot_id}
+        where s.direction_id = :direction_id
+          and s.plan_lot_id = :plan_lot_id
     sql
   end
 
   def okato
-    DB.query_value(<<-sql)
+    DB.query_value(<<-sql, plan_spec_id)
       select nvl(h.okato, a.okato)
         from ksazd.fias_plan_specifications s,
              ksazd.fias_houses h,
              ksazd.fias_addrs a
         where s.houseid = h.houseid(+)
           and s.addr_aoid = a.aoid
-          and s.plan_specification_id = #{plan_spec_id}
+          and s.plan_specification_id = :id
     sql
   end
 
   def plan_spec_amounts_from_db
-    DB.query_all(<<-sql)
+    DB.query_all(<<-sql, plan_spec_id)
       select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
         from ksazd.plan_spec_amounts a
-        where a.plan_specification_id = #{plan_spec_id}
+        where a.plan_specification_id = :id
         order by a.year
     sql
   end

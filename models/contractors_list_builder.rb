@@ -70,36 +70,38 @@ class ContractorsListBuilder
     cost ? cost.to_s('F') : '0'
   end
 
+  PLAN_LOT_CONTRACTORS_SQL = <<-sql
+    select c.id, c.fullname, c.inn, c.kpp
+      from ksazd.contractors c,
+           ksazd.plan_lot_contractors plc
+      where plc.contractor_id = c.id
+        and plc.plan_lot_id = :plan_lot_id
+  sql
+
   def plan_lot_contractors
-    DB.query_all(<<-sql)
-      select c.id, c.fullname, c.inn, c.kpp
-        from ksazd.contractors c,
-             ksazd.plan_lot_contractors plc
-        where plc.contractor_id = c.id
-          and plc.plan_lot_id = #{aqua_lot.plan_lot_id}
-    sql
-      .map do |values|
-        Contractor.new.tap { |contractor| contractor.values = values }
-      end
+    DB.query_all(PLAN_LOT_CONTRACTORS_SQL, aqua_lot.plan_lot_id).map do |values|
+      Contractor.new.tap { |contractor| contractor.values = values }
+    end
   end
 
+  LOT_OFFERS_SQL = <<-sql
+    select b.contractor_id, o.num, o.type_id, o.status_id, o.rebidded,
+           o.absent_auction, s.cost, s.cost_nds, s.final_cost, s.final_cost_nds
+      from ksazd.bidders b,
+           ksazd.offers o,
+           ksazd.offer_specifications s
+      where b.id = o.bidder_id
+        and o.id = s.offer_id
+        and o.version = 0
+        and s.specification_id = :exec_spec_id
+  sql
+
   def lot_offers
-    DB.query_all(<<-sql)
-      select b.contractor_id, o.num, o.type_id, o.status_id, o.rebidded,
-             o.absent_auction, s.cost, s.cost_nds, s.final_cost, s.final_cost_nds
-        from ksazd.bidders b,
-             ksazd.offers o,
-             ksazd.offer_specifications s
-        where b.id = o.bidder_id
-          and o.id = s.offer_id
-          and o.version = 0
-          and s.specification_id = #{aqua_lot.exec_spec_id}
-    sql
-      .map do |values|
-        Offer.new.tap do |offer|
-          offer.values = values
-          offer.contractor = Contractor.find(offer.contractor_id)
-        end
+    DB.query_all(LOT_OFFERS_SQL, aqua_lot.exec_spec_id).map do |values|
+      Offer.new.tap do |offer|
+        offer.values = values
+        offer.contractor = Contractor.find(offer.contractor_id)
       end
+    end
   end
 end

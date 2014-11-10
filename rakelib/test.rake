@@ -1,11 +1,13 @@
 require 'awesome_print'
 require 'pp'
 
+PLAN_SPEC_GUID = 'A7245F5FA1C3E92F72E60D102021AA47'
+
 namespace :test do
   desc 'Aqua lot test'
   task :aqua_lot do
     require 'models/aqua_lot_builder'
-    lot_builder = AquaLotBuilder.new(343163, 819607)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
     ap lot_builder.to_h
   end
 
@@ -13,7 +15,7 @@ namespace :test do
   task :contractors_list do
     require 'models/aqua_lot_builder'
     require 'models/contractors_list_builder'
-    lot_builder = AquaLotBuilder.new(343163, 819607)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
     contractors_builder = ContractorsListBuilder.new(lot_builder)
     ap contractors_builder.contractors
   end
