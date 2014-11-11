@@ -388,11 +388,13 @@ class AquaLotBuilder
 
   def additional_to
     return '' unless plan_lot.additional_to
-    DB.query_value(<<-sql, plan_spec.direction_id, plan_spec.plan_lot_id)
+    DB.query_value(<<-sql, plan_spec.direction_id, plan_lot.additional_to)
       select distinct s.guid
-        from ksazd.plan_specifications s
-        where s.direction_id = :direction_id
-          and s.plan_lot_id = :plan_lot_id
+        from ksazd.plan_specifications s,
+             ksazd.plan_lots l
+        where s.plan_lot_id = l.id
+          and s.direction_id = :direction_id
+          and l.guid = hextoraw(:guid)
     sql
   end
 
