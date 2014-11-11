@@ -8,16 +8,20 @@ class AquaLotBuilder
   # ИС КСАЗД
   FUTURE_PLAN_EI   = 31003 # Заключить договор с единственным поставщиком
   CONTRACT_DONE    = 33100 # Договор заключен
+  FRUSTRATED       = 33110 # Признана несостоявшейся
   STATE_PLANNED    = 1     # План (не Внеплан)
   ADDITIONAL_RATIO = 0.2   # Дозакупка >< 20%
+  CANCELLED        = 15004 # Отменен
+  EXCLUDED         = 15007 # Исключен СД
   # ИС АКВа
   STATE_PLAN            = 'P'  # Плановая закупка
   STATE_UNPLAN          = 'V'  # Внеплановая закупка
   STATE_ADD_PLAN        = 'D3' # Плановая дозакупка
   STATE_ADD_UNPLAN_LESS = 'D1' # Внеплановая дозакупка менее 20%
   STATE_ADD_UNPLAN_MORE = 'D2' # Внеплановая дозакупка более 20%
-  IN_PROGRESS      = 1     # В работе
-  TENDER_COMPLETED = 2     # Закупка проведена
+  IN_PROGRESS       = 1    # В работе
+  TENDER_COMPLETED  = 2    # Закупка проведена
+  TENDER_FRUSTRATED = 4    # Несостоявшаяся закупка
   AQUA_DZO         = 'DZO' # Организатор процедуры (по умолчанию)
   AQUA_EI          = 'EI'  # Способ закупки ЕИ
   INVESTMENTS      = '001' # Инвестиционные средства
@@ -56,6 +60,8 @@ class AquaLotBuilder
       'LPLVP' => plan_lot.additional_to ? additional_state : lot_state,
       # Статус лота
       'LOTSTATUS' => lotstatus,
+      # метка удаления
+      'LOTDEL' => [CANCELLED, EXCLUDED].include?(plan_lot.state) ? 'X' : '',
       # Организатор процедуры
       'ORG' => Organizer.lookup(plan_lot.department_id) || AQUA_DZO,
       # Закупочная комиссия
@@ -138,10 +144,8 @@ class AquaLotBuilder
       'L_WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
       'ZNUMPR' => tender.etp_num || '',
-      # Номер лота из КСАЗД (планирование)
-      'ZNUMKSAZDP' => format_guid(plan_spec.guid),
-      # Номер лота из КСАЗД (исполнение)
-      'ZNUMKSAZDF' => spec_id || '',
+      # Номер лота из КСАЗД
+      'ZNUMKSAZDP' => format_guid(spec_guid || plan_spec_guid),
       # Планируемый объем обязательств (финансирование с НДС)
       'FINSN5Y1' => format_cost(plan_spec_amounts[0][0]),
       'FINSN5Y2' => format_cost(plan_spec_amounts[1][0]),
@@ -163,21 +167,29 @@ class AquaLotBuilder
     }
   end
 
+  def plan_lot_id
+    plan_spec.plan_lot_id
+  end
+
+  def exec_spec_id
+    spec_id
+  end
+
   private
 
   # hash values -----------------------------------------------------
 
   def customer
     ksazd_id = plan_spec.customer_id
-    Department.lookup(ksazd_id) ||
-      begin fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}" end
+    Department.lookup(ksazd_id) or
+      fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}"
   end
 
   def lotstatus
-    if @spec_id && lot.status_id == CONTRACT_DONE
-      TENDER_COMPLETED
-    else
-      IN_PROGRESS
+    case lot.status_id
+    when FRUSTRATED then TENDER_FRUSTRATED
+    when CONTRACT_DONE then TENDER_COMPLETED
+    else IN_PROGRESS
     end
   end
 
@@ -189,7 +201,7 @@ class AquaLotBuilder
 
   def zkurator
     value = MonitorService.lookup(plan_spec.monitor_service_id)
-    sprintf("%03d", value)
+    sprintf('%03d', value)
   end
 
   def paragraph
@@ -324,7 +336,7 @@ class AquaLotBuilder
     @plan_spec_id ||= DB.query_value(PLAN_SPEC_SQL, plan_spec_guid).to_i
   end
 
-  SPEC_FROM_PLAN_SQL = <<-sql
+  SPEC_ID_FROM_PLAN_SQL = <<-sql
     select s.id
       from ksazd.specifications s,
            ksazd.lots l
@@ -333,7 +345,7 @@ class AquaLotBuilder
         and s.plan_specification_id = :plan_spec_id
   sql
 
-  SPEC_FROM_SQL = <<-sql
+  SPEC_ID_SQL = <<-sql
     select s.id
       from ksazd.specifications s,
            ksazd.lots l
@@ -343,13 +355,12 @@ class AquaLotBuilder
   sql
 
   def spec_id
-    @spec_id ||= begin
+    @spec_id ||=
       if spec_guid
-        DB.query_value(SPEC_FROM_SQL, spec_guid).to_i
+        DB.query_value(SPEC_ID_SQL, spec_guid).to_i
       else
-        DB.query_value(SPEC_FROM_PLAN_SQL, plan_spec_id).to_i
+        DB.query_value(SPEC_ID_FROM_PLAN_SQL, plan_spec_id).to_i
       end
-    end
   end
 
   def main_lot_cost

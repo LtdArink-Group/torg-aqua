@@ -70,7 +70,7 @@ namespace :test do
     #   c.hook_into :webmock # or :fakeweb
     # end
 
-    lot_builder = AquaLotBuilder.new(343163, 819607)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nul)
     data = lot_builder.to_h
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
@@ -82,7 +82,7 @@ namespace :test do
   end
 
   desc 'VCR dump'
-  task :vcr_to_xml, [:name] do |t, args|
+  task :vcr_to_xml, [:name] do |_, args|
     require 'yaml'
     cassette = YAML.load_file("fixtures/vcr_cassettes/#{args.name}.yml")
     request =  cassette['http_interactions'][0]['request']['body']['string']
