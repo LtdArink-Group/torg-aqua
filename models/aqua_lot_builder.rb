@@ -399,7 +399,7 @@ class AquaLotBuilder
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
           and s.direction_id = :direction_id
-          and l.guid = :guid
+          and l.guid = hextoraw(:guid)
     sql
   end
 

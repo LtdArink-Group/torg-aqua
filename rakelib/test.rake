@@ -81,7 +81,7 @@ namespace :test do
   desc 'Update AQUa projects dates'
   task :aqua_projects_dates do
     puts 'Getting project data from AQUA'
-    date = Date.new(2013,8,25)
+    date = Date.new(2013,1,1)
     while date <= Date.today
       puts date
       formatted_date = date.strftime('%d.%m.%Y')
