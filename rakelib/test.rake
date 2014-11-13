@@ -1,9 +1,19 @@
 require 'awesome_print'
 require 'pp'
 
-PLAN_SPEC_GUID = 'A7245F5FA1C3E92F72E60D102021AA47'
+GUID = 'A7245F5FA1C3E92F72E60D102021AA47'
+PLAN_SPEC_GUID = [GUID].pack('H*')
 
 namespace :test do
+  task :guid do
+    require 'db/db'
+    ap DB.query_value(<<-sql, GUID).class
+      select ps.guid
+        from ksazd.plan_specifications ps
+        where ps.guid = hextoraw(:guid)
+    sql
+  end
+
   desc 'Aqua lot test'
   task :aqua_lot do
     require 'models/aqua_lot_builder'
@@ -57,20 +67,50 @@ namespace :test do
     puts 'Done!'
   end
 
+  require 'db/db'
+
+  def update_project(id, date)
+    DB.exec(<<-sql, date, id)
+      update ksazd.invest_project_names
+        set updated_at = :updated_at
+        where aqua_id = :aqua_id
+    sql
+    DB.commit
+  end
+
+  desc 'Update AQUa projects dates'
+  task :aqua_projects_dates do
+    puts 'Getting project data from AQUA'
+    date = Date.new(2013,8,25)
+    while date <= Date.today
+      puts date
+      formatted_date = date.strftime('%d.%m.%Y')
+      projects(formatted_date, formatted_date) do |data|
+        data.each do |project|
+          update_project(project[:spp].to_s, date)
+        end
+        puts "#{data.size} project(s) updated"
+      end
+      date += 1
+    end
+    puts 'Done!'
+  end
+
   desc 'Send AQUa lots test'
   task :send_aqua_lot do
     require 'models/aqua_lot_builder'
     require 'models/contractors_list_builder'
     require 'aqua/lots_endpoint'
-    # require 'webmock'
-    # require 'vcr'
+    require 'webmock'
+    require 'vcr'
 
-    # VCR.configure do |c|
-    #   c.cassette_library_dir = 'fixtures/vcr_cassettes'
-    #   c.hook_into :webmock # or :fakeweb
-    # end
+    VCR.configure do |c|
+      c.cassette_library_dir = 'fixtures/vcr_cassettes'
+      c.hook_into :webmock
+      c.allow_http_connections_when_no_cassette = true
+    end
 
-    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nul)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
     data = lot_builder.to_h
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }

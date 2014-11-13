@@ -1,7 +1,10 @@
 require 'models/queries'
 require 'models/aqua_lot'
+require 'models/aqua_lot_builder'
+require 'models/contractors_list_builder'
 require 'services/loggers'
 require 'services/syncronizer'
+require 'aqua/lots_endpoint'
 
 class NewLots
   def self.process
@@ -41,5 +44,19 @@ class NewLots
   end
 
   def update_aqua
+    logger.info 'Передача лотов в АКВа'
+    AquaLot.pending.first(10).each do |lot|
+      send_lot(lot)
+    end
+  end
+
+  def send_lot
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
+    data = lot_builder.to_h
+    contractors = ContractorsListBuilder.new(lot_builder).contractors
+    data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
+    response = LotsEndpoint.send('I_LOTS' => { 'item' => data })
+    puts "response status: #{response.status}"
+    puts response.message if response.message
   end
 end

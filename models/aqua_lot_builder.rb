@@ -31,7 +31,8 @@ class AquaLotBuilder
   attr_reader :plan_spec_guid, :spec_guid
 
   def initialize(plan_spec_guid, spec_guid)
-    @plan_spec_guid, @spec_guid = plan_spec_guid, spec_guid
+    @plan_spec_guid = plan_spec_guid
+    @spec_guid = spec_guid
   end
 
   def to_h
@@ -146,6 +147,8 @@ class AquaLotBuilder
       'ZNUMPR' => tender.etp_num || '',
       # Номер лота из КСАЗД
       'ZNUMKSAZDP' => format_guid(spec_guid || plan_spec_guid),
+      # Номер лота из КСАЗД (исполнение)
+      # 'ZNUMKSAZDF' => '',
       # Планируемый объем обязательств (финансирование с НДС)
       'FINSN5Y1' => format_cost(plan_spec_amounts[0][0]),
       'FINSN5Y2' => format_cost(plan_spec_amounts[1][0]),
@@ -333,7 +336,7 @@ class AquaLotBuilder
   sql
 
   def plan_spec_id
-    @plan_spec_id ||= DB.query_value(PLAN_SPEC_SQL, plan_spec_guid).to_i
+    @plan_spec_id ||= DB.query_value(PLAN_SPEC_SQL, DB.guid(plan_spec_guid)).to_i
   end
 
   SPEC_ID_FROM_PLAN_SQL = <<-sql
@@ -351,7 +354,7 @@ class AquaLotBuilder
            ksazd.lots l
       where s.lot_id = l.id
         and l.next_id is null
-        and s.guid = :guid
+        and s.guid = hextoraw(:guid)
   sql
 
   def spec_id
@@ -364,7 +367,7 @@ class AquaLotBuilder
   end
 
   def main_lot_cost
-    DB.query_value(<<-sql, plan_lot.additional_to)
+    DB.query_value(<<-sql, DB.guid(plan_lot.additional_to))
       select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
@@ -375,7 +378,8 @@ class AquaLotBuilder
   end
 
   def additional_cost_sum
-    DB.query_value(<<-sql, plan_lot.additional_to, plan_lot.additional_num)
+    guid = DB.guid(plan_lot.additional_to)
+    DB.query_value(<<-sql, guid, plan_lot.additional_num)
       select sum(s.cost_nds * s.qty)
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
@@ -388,13 +392,14 @@ class AquaLotBuilder
 
   def additional_to
     return '' unless plan_lot.additional_to
-    DB.query_value(<<-sql, plan_spec.direction_id, plan_lot.additional_to)
+    guid = DB.guid(plan_lot.additional_to)
+    DB.query_value(<<-sql, plan_spec.direction_id, guid)
       select distinct s.guid
         from ksazd.plan_specifications s,
              ksazd.plan_lots l
         where s.plan_lot_id = l.id
           and s.direction_id = :direction_id
-          and l.guid = hextoraw(:guid)
+          and l.guid = :guid
     sql
   end
 
