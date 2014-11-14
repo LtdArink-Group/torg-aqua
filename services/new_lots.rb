@@ -57,40 +57,40 @@ class NewLots
   end
 
   def send_lot(lot)
-    data = build_data(lot) and send_data(lot.id, data)
+    data = build_data(lot) and send_data(lot, data)
   end
 
   def build_data(lot)
     lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.exec_spec_guid)
-    return flase unless data = get_lot_data(lot_builder.to_h, lot.id)
+    return flase unless data = get_lot_data(lot_builder.to_h, lot)
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
     { 'I_LOTS' => { 'item' => data } }
   end
 
-  def get_lot_data(builder, lot_id)
+  def get_lot_data(builder, lot)
     builder.to_h
   rescue => error
-    delivery_error(lot_id, "КСАЗД: #{error.message}")
+    delivery_error(lot, "КСАЗД: #{error.message}")
   end
 
-  def send_data(lot_id, data)
+  def send_data(lot, data)
     response = LotsEndpoint.send(data)
     if response.status == PROCESSED
-      delivery_success(lot_id)
+      delivery_success(lot)
     else
       message = "АКВА: #{response.status} - #{response.message}"
-      delivery_error(lot_id, message)
+      delivery_error(lot, message)
     end
   end
 
-  def delivery_success(lot_id)
+  def delivery_success(lot)
     lot.consistent
-    Delivery.create(delivery_attributes(lot_id, Delivery::State::SUCCESS))
+    Delivery.create(delivery_attributes(lot.id, Delivery::State::SUCCESS))
   end
 
-  def delivery_error(lot_id, message)
-    Delivery.create(delivery_attributes(lot_id, Delivery::State::ERROR, message))
+  def delivery_error(lot, message)
+    Delivery.create(delivery_attributes(lot.id, Delivery::State::ERROR, message))
     false
   end
 
