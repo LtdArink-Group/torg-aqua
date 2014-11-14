@@ -62,7 +62,7 @@ class NewLots
 
   def build_data(lot)
     lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.exec_spec_guid)
-    return flase unless data = get_lot_data(lot_builder.to_h, lot)
+    return flase unless data = get_lot_data(lot_builder, lot)
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
     { 'I_LOTS' => { 'item' => data } }
