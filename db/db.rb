@@ -43,11 +43,20 @@ class DB
     end
 
     def encode(val)
-      if val.nil?
-        'null'
-      else
-        val.is_a?(String) ? "'#{val}'" : val
+      val.nil? ? 'null' : encode_type(val)
+    end
+
+    def encode_type(val)
+      case val
+      when String then "'#{val}'"
+      when Time then encode_time(val)
+      else val
       end
+    end
+
+    def encode_time(time)
+      time_string = time.strftime('%Y-%m-%d %H:%M:%S')
+      "to_date('#{time_string}', 'YYYY-MM-DD HH24:MI:SS')"
     end
 
     def guid(data)

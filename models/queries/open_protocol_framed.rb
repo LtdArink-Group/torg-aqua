@@ -1,6 +1,6 @@
 require 'db/query'
 
-class OpenProtocolFramed < Query
+class Query::OpenProtocolFramed < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, s.guid, max(op.updated_at)
       from ksazd.protocols p,

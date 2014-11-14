@@ -1,6 +1,6 @@
 require 'db/query'
 
-class LotFramed < Query
+class Query::LotFramed < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, s.guid, max(l.updated_at)
       from ksazd.protocols p,

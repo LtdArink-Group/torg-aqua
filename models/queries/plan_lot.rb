@@ -1,6 +1,6 @@
 require 'db/query'
 
-class PlanLot < Query
+class Query::PlanLot < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, null, max(pl.updated_at)
       from ksazd.protocols p,

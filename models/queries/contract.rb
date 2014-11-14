@@ -1,6 +1,6 @@
 require 'db/query'
 
-class Contract < Query
+class Query::Contract < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, null, max(ct.updated_at)
       from ksazd.protocols p,

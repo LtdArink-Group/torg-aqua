@@ -50,9 +50,7 @@ class AquaLotBuilder
       # Код валюты
       'WAERS' => RUSSIAN_RUBLE,
       # Внутренний номер инвестиционного проекта
-
-      'SPP' => 'T-4070-00083', # TODO: replace with real one from KSAZD
-
+      'SPP' => invest_project || 'T-4070-00083',
       # Название лота
       'LNAME' => plan_spec.name,
       # Номер лота
@@ -188,6 +186,12 @@ class AquaLotBuilder
       fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}"
   end
 
+  def invest_project
+    invest_project_name_id = 
+      InvestPoriect.find(plan_spec.invest_project_id).invest_project_name_id
+    InvestProjectName.lookup(invest_project_name_id)
+  end
+
   def lotstatus
     case lot.status_id
     when FRUSTRATED then TENDER_FRUSTRATED
@@ -203,7 +207,9 @@ class AquaLotBuilder
   end
 
   def zkurator
-    value = MonitorService.lookup(plan_spec.monitor_service_id)
+    ksazd_id = plan_spec.monitor_service_id
+    value = MonitorService.lookup(ksazd_id) or
+      fail "Не удалось найти куратора АКВА для id: #{ksazd_id}"
     sprintf('%03d', value)
   end
 
@@ -362,7 +368,8 @@ class AquaLotBuilder
       if spec_guid
         DB.query_value(SPEC_ID_SQL, spec_guid).to_i
       else
-        DB.query_value(SPEC_ID_FROM_PLAN_SQL, plan_spec_id).to_i
+        values = DB.query_first_row(SPEC_ID_FROM_PLAN_SQL, plan_spec_id)
+        values[0].to_i if values
       end
   end
 

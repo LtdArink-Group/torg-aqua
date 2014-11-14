@@ -1,5 +1,7 @@
 require_relative 'ksazd/plan_lot'
 require_relative 'ksazd/plan_specification'
+require_relative 'ksazd/invest_project'
+require_relative 'ksazd/invest_project_name'
 require_relative 'ksazd/commission'
 require_relative 'ksazd/tender'
 require_relative 'ksazd/lot'

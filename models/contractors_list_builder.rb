@@ -13,13 +13,12 @@ class ContractorsListBuilder
     @aqua_lot = aqua_lot
     @contractors = Hash.new { |hash, key| hash[key] = default_contractor }
     load_plan_contractors
-    load_exec_contractors
+    load_exec_contractors if aqua_lot.exec_spec_id
   end
 
   private
 
   attr_reader :aqua_lot
-
   attr_writer :contractors
 
   def load_plan_contractors

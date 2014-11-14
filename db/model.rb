@@ -36,7 +36,7 @@ class Model
 
     def create(values_hash)
       DB.exec(<<-sql)
-        insert into #{table} (#{ values_hash.keys.to_s.join(', ') })
+        insert into #{table} (#{ values_hash.keys.map(&:to_s).join(', ') })
           values (#{ values_hash.values.map { |val| DB.encode(val) }.join(', ') })
       sql
       DB.commit
@@ -50,12 +50,20 @@ class Model
       @table_name ||= to_s.scan(/[A-Z][a-z]+/).map(&:downcase).join('_')
     end
 
+    def table_name_pluralized
+      if table_name.end_with?('y')
+        table_name[0..-2] + 'ies'
+      else
+        table_name + table_suffix
+      end
+    end
+
     def table_suffix
       %w(s x).include?(table_name[-1]) ? 'es' : 's'
     end
 
     def table
-      schema_name + (@tablename || table_name + table_suffix)
+      schema_name + (@tablename || table_name_pluralized)
     end
   end
 

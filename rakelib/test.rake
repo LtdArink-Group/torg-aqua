@@ -67,7 +67,7 @@ namespace :test do
     puts 'Done!'
   end
 
-  require 'db/db'
+  # require 'db/db'
 
   def update_project(id, date)
     DB.exec(<<-sql, date, id)
@@ -81,7 +81,7 @@ namespace :test do
   desc 'Update AQUa projects dates'
   task :aqua_projects_dates do
     puts 'Getting project data from AQUA'
-    date = Date.new(2013,1,1)
+    date = Date.new(2013, 1, 1)
     while date <= Date.today
       puts date
       formatted_date = date.strftime('%d.%m.%Y')
@@ -129,8 +129,8 @@ namespace :test do
     IO.write("fixtures/vcr_cassettes/#{args.name}.xml", request)
   end
 
-  desc 'Monitor lots test'
-  task :monitor_lots do
+  desc 'New lots service test'
+  task :new_lots do
     require 'services/new_lots'
     NewLots.process
   end

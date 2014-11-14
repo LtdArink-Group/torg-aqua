@@ -1,6 +1,6 @@
 require 'db/query'
 
-class Offer < Query
+class Query::Offer < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, null, max(o.updated_at)
       from ksazd.protocols p,

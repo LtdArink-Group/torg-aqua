@@ -1,6 +1,6 @@
 require 'db/query'
 
-class OpenProtocol < Query
+class Query::OpenProtocol < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, null, max(op.updated_at)
       from ksazd.protocols p,

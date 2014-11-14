@@ -1,6 +1,10 @@
 require 'db/model'
+require 'db/model/lookup'
 
 class InvestProjectName < Model
+  extend Model::Lookup
+
+  attributes :aqua_id
   schema :ksazd
 
   def self.merge(aqua_id, name, department_id)

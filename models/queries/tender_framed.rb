@@ -1,6 +1,6 @@
 require 'db/query'
 
-class TenderFramed < Query
+class Query::TenderFramed < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, s.guid, max(t.updated_at)
       from ksazd.protocols p,

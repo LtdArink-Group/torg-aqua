@@ -1,6 +1,6 @@
 require 'db/query'
 
-class WinnerProtocol < Query
+class Query::WinnerProtocol < Query::Base
   CHANGED_DATA_SQL = <<-sql
     select ps.guid, null, max(wp.updated_at)
       from ksazd.protocols p,
