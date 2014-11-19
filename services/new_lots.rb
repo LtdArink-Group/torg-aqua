@@ -38,12 +38,16 @@ class NewLots
 
   def detect_changes_for(klass)
     query = klass.new
-    query.data.each do |guids|
-      AquaLot.new(*guids[0, 2]).pending
-    end
+    query.data.each { |guids| pending(guids) }
     return if query.data.empty?
     logger.info "  #{klass}: #{query.data.size}"
     query.save_maximum_time
+  end
+
+  # make frame pending too for price recalc
+  def pending(guids)
+    AquaLot.new(guids[0], nil).pending if guids[1]
+    AquaLot.new(guids[0], guids[1]).pending
   end
 
   def update_aqua
@@ -62,7 +66,7 @@ class NewLots
 
   def build_data(lot)
     lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.exec_spec_guid)
-    return flase unless data = get_lot_data(lot_builder, lot)
+    return false unless data = get_lot_data(lot_builder, lot)
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
     { 'I_LOTS' => { 'item' => data } }
@@ -71,6 +75,7 @@ class NewLots
   def get_lot_data(builder, lot)
     builder.to_h
   rescue => error
+    Airbrake.notify(error)
     delivery_error(lot, "КСАЗД: #{error.message}")
   end
 

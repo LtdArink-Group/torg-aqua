@@ -72,9 +72,9 @@ class AquaLotBuilder
       # Способ закупки (ЕИ по итогам конкурентных процедур)
       'SPZEI' => lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
       # Планируемая цена лота (руб. с НДС)
-      'SUMN' => format_cost(plan_spec.cost_nds),
+      'SUMN' => format_cost(cost_nds),
       # Планируемая цена лота (руб. без  НДС)
-      'SUM_' => format_cost(plan_spec.cost),
+      'SUM_' => format_cost(cost),
       # Документ, на основании которого определена планируемая цена
       'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
@@ -176,6 +176,14 @@ class AquaLotBuilder
     spec_id
   end
 
+  def cost_nds
+    plan_spec.cost_nds
+  end
+
+  def cost
+    plan_spec.cost
+  end
+
   private
 
   # hash values -----------------------------------------------------
@@ -188,7 +196,7 @@ class AquaLotBuilder
 
   def invest_project
     invest_project_name_id = 
-      InvestPoriect.find(plan_spec.invest_project_id).invest_project_name_id
+      InvestProject.find(plan_spec.invest_project_id).invest_project_name_id
     InvestProjectName.lookup(invest_project_name_id)
   end
 

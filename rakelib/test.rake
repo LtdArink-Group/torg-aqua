@@ -1,8 +1,7 @@
 require 'awesome_print'
 require 'pp'
 
-GUID = 'A7245F5FA1C3E92F72E60D102021AA47'
-PLAN_SPEC_GUID = [GUID].pack('H*')
+PLAN_SPEC_GUID = ['2A691E8148F136A2D737F3FD52DBDB51'].pack('H*')
 
 namespace :test do
   task :guid do
@@ -67,8 +66,6 @@ namespace :test do
     puts 'Done!'
   end
 
-  # require 'db/db'
-
   def update_project(id, date)
     DB.exec(<<-sql, date, id)
       update ksazd.invest_project_names
@@ -94,39 +91,6 @@ namespace :test do
       date += 1
     end
     puts 'Done!'
-  end
-
-  desc 'Send AQUa lots test'
-  task :send_aqua_lot do
-    require 'models/aqua_lot_builder'
-    require 'models/contractors_list_builder'
-    require 'aqua/lots_endpoint'
-    require 'webmock'
-    require 'vcr'
-
-    VCR.configure do |c|
-      c.cassette_library_dir = 'fixtures/vcr_cassettes'
-      c.hook_into :webmock
-      c.allow_http_connections_when_no_cassette = true
-    end
-
-    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
-    data = lot_builder.to_h
-    contractors = ContractorsListBuilder.new(lot_builder).contractors
-    data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
-    response = LotsEndpoint.send('I_LOTS' => { 'item' => data })
-    # VCR.use_cassette('lots') do
-      puts "response status: #{response.status}"
-      puts response.message if response.message
-    # end
-  end
-
-  desc 'VCR dump'
-  task :vcr_to_xml, [:name] do |_, args|
-    require 'yaml'
-    cassette = YAML.load_file("fixtures/vcr_cassettes/#{args.name}.yml")
-    request =  cassette['http_interactions'][0]['request']['body']['string']
-    IO.write("fixtures/vcr_cassettes/#{args.name}.xml", request)
   end
 
   desc 'New lots service test'
