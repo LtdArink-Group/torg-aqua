@@ -121,7 +121,7 @@ class AquaLotBuilder
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
-      'ZEI' => plan_spec.qty,
+      'ZEI' => qty,
       # ОКЕИ
       'OKEI' => Unit.lookup(plan_spec.unit_id),
       # ОКАТО
@@ -176,15 +176,6 @@ class AquaLotBuilder
     spec_id
   end
 
-  def cost_nds
-    spec_guid ? spec
-    plan_spec.cost_nds - framed_cost_nds
-  end
-
-  def cost
-    plan_spec.cost - framed_cost
-  end
-
   private
 
   # hash values -----------------------------------------------------
@@ -215,6 +206,14 @@ class AquaLotBuilder
     CommissionType.lookup(type_id)
   end
 
+  def cost_nds
+    spec_guid ? spec.cost_nds : (plan_spec.cost_nds - framed_cost_nds)
+  end
+
+  def cost
+    spec_guid ? spec.cost : (plan_spec.cost - framed_cost)
+  end
+
   def zkurator
     ksazd_id = plan_spec.monitor_service_id
     value = MonitorService.lookup(ksazd_id) or
@@ -225,6 +224,10 @@ class AquaLotBuilder
   def paragraph
     num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
     num ? "00#{num}" : ''
+  end
+
+  def qty
+    spec_guid ? spec.qty : plan_spec.qty
   end
 
   def prn1
@@ -469,12 +472,6 @@ class AquaLotBuilder
   sql
 
   def framed_costs
-    @framed_costs ||= [0, 0].tap do |a|
-      values = DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
-      if values
-        a[0] = values[0]
-        a[1] = values[1]
-      end
-    end
+    @framed_costs ||= DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
   end
 end
