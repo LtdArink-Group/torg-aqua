@@ -177,11 +177,12 @@ class AquaLotBuilder
   end
 
   def cost_nds
-    plan_spec.cost_nds
+    spec_guid ? spec
+    plan_spec.cost_nds - framed_cost_nds
   end
 
   def cost
-    plan_spec.cost
+    plan_spec.cost - framed_cost
   end
 
   private
@@ -195,7 +196,7 @@ class AquaLotBuilder
   end
 
   def invest_project
-    invest_project_name_id = 
+    invest_project_name_id =
       InvestProject.find(plan_spec.invest_project_id).invest_project_name_id
     InvestProjectName.lookup(invest_project_name_id)
   end
@@ -381,61 +382,99 @@ class AquaLotBuilder
       end
   end
 
+  MAIN_LOT_COST_SQL = <<-sql
+    select sum(s.cost_nds * s.qty)
+      from ksazd.plan_specifications s,
+           ksazd.plan_lots l
+      where s.plan_lot_id = l.id
+        and l.guid = hextoraw(:guid)
+        and l.version = 0
+  sql
+
   def main_lot_cost
-    DB.query_value(<<-sql, DB.guid(plan_lot.additional_to))
-      select sum(s.cost_nds * s.qty)
-        from ksazd.plan_specifications s,
-             ksazd.plan_lots l
-        where s.plan_lot_id = l.id
-          and l.guid = hextoraw(:guid)
-          and l.version = 0
-    sql
+    DB.query_value(MAIN_LOT_COST_SQL, DB.guid(plan_lot.additional_to))
   end
+
+  ADDITIONAL_COST_SUM_SQL = <<-sql
+    select sum(s.cost_nds * s.qty)
+      from ksazd.plan_specifications s,
+           ksazd.plan_lots l
+      where s.plan_lot_id = l.id
+        and l.additional_to = hextoraw(:guid)
+        and l.additional_num <= :num
+        and l.version = 0
+  sql
 
   def additional_cost_sum
     guid = DB.guid(plan_lot.additional_to)
-    DB.query_value(<<-sql, guid, plan_lot.additional_num)
-      select sum(s.cost_nds * s.qty)
-        from ksazd.plan_specifications s,
-             ksazd.plan_lots l
-        where s.plan_lot_id = l.id
-          and l.additional_to = hextoraw(:guid)
-          and l.additional_num <= :num
-          and l.version = 0
-    sql
+    DB.query_value(ADDITIONAL_COST_SUM_SQL, guid, plan_lot.additional_num)
   end
+
+  ADDITIONAL_TO_SQL = <<-sql
+    select distinct s.guid
+      from ksazd.plan_specifications s,
+           ksazd.plan_lots l
+      where s.plan_lot_id = l.id
+        and s.direction_id = :direction_id
+        and l.guid = hextoraw(:guid)
+  sql
 
   def additional_to
     return '' unless plan_lot.additional_to
     guid = DB.guid(plan_lot.additional_to)
-    DB.query_value(<<-sql, plan_spec.direction_id, guid)
-      select distinct s.guid
-        from ksazd.plan_specifications s,
-             ksazd.plan_lots l
-        where s.plan_lot_id = l.id
-          and s.direction_id = :direction_id
-          and l.guid = hextoraw(:guid)
-    sql
+    DB.query_value(ADDITIONAL_TO_SQL, plan_spec.direction_id, guid)
   end
+
+  OKATO_SQL = <<-sql
+    select nvl(h.okato, a.okato)
+      from ksazd.fias_plan_specifications s,
+           ksazd.fias_houses h,
+           ksazd.fias_addrs a
+      where s.houseid = h.houseid(+)
+        and s.addr_aoid = a.aoid
+        and s.plan_specification_id = :id
+  sql
 
   def okato
-    DB.query_value(<<-sql, plan_spec_id)
-      select nvl(h.okato, a.okato)
-        from ksazd.fias_plan_specifications s,
-             ksazd.fias_houses h,
-             ksazd.fias_addrs a
-        where s.houseid = h.houseid(+)
-          and s.addr_aoid = a.aoid
-          and s.plan_specification_id = :id
-    sql
+    DB.query_value(OKATO_SQL, plan_spec_id)
   end
 
+  PLAN_SPEC_AMOUNTS_SQL = <<-sql
+    select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
+      from ksazd.plan_spec_amounts a
+      where a.plan_specification_id = :id
+      order by a.year
+  sql
+
   def plan_spec_amounts_from_db
-    DB.query_all(<<-sql, plan_spec_id)
-      select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
-        from ksazd.plan_spec_amounts a
-        where a.plan_specification_id = :id
-        order by a.year
-    sql
+    DB.query_all(PLAN_SPEC_AMOUNTS_SQL, plan_spec_id)
+  end
+
+  def framed_cost_nds
+    framed_costs[0] || 0
+  end
+
+  def framed_cost
+    framed_costs[1] || 0
+  end
+
+  FRAMED_COSTS_SQL = <<-sql
+    select sum(s.cost_nds), sum(s.cost)
+      from ksazd.specifications s,
+           ksazd.lots l
+      where s.lot_id = l.id
+        and l.next_id is null
+        and s.frame_id = :spec_id
+        and l.status_id != #{FRUSTRATED}
+  sql
+
+  def framed_costs
+    @framed_costs ||= [0, 0].tap do |a|
+      values = DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
+      if values
+        a[0] = values[0]
+        a[1] = values[1]
+      end
+    end
   end
 end

@@ -56,6 +56,7 @@ namespace :aqua do
   task :change_plan do
     send_lot do |data|
       data['OBJECT_TYPE'] = 'V'
+      data['LPLVP'] = 'V'
     end
   end
 
@@ -94,7 +95,7 @@ namespace :aqua do
   desc 'Planned cost without VAT less than spending'
   task :err_cost do
     send_lot do |data|
-      data['SUM_'] = 100
+      data['SUM_'] = 1000000
     end
   end
 
