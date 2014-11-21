@@ -55,7 +55,7 @@ tables:
   aqua_lots:
     id: number(38)
     plan_spec_guid: raw(16)
-    exec_spec_guid: raw(16)
+    spec_guid: raw(16)
     state: char(1)
   deliveries:
     aqua_lot_id: number(38)
