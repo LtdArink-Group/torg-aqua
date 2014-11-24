@@ -100,7 +100,7 @@ class AquaLotBuilder
       # Использование электронной торговой площадки b2b.enegro План
       'B2BP' => EtpAddress.lookup(plan_lot.etp_address_id),
       # Использование электронной торговой площадки b2b.enegro План
-      'B2BF' => EtpAddress.lookup(tender.etp_address_id),
+      'B2BF' => EtpAddress.lookup(tender.etp_address_id) || '',
       # Подразделение - куратор закупки
       'ZKURATOR' => zkurator,
       # Дата начала поставки товаров, выполнения работ, услуг
@@ -182,7 +182,8 @@ class AquaLotBuilder
 
   def customer
     ksazd_id = plan_spec.customer_id
-    Department.lookup(ksazd_id) or
+    root_id = Department.root(ksazd_id)
+    Department.lookup(root_id) or
       fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}"
   end
 
@@ -222,6 +223,7 @@ class AquaLotBuilder
   end
 
   def paragraph
+    return '' if plan_lot.point_clause.nil?
     num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
     num ? "00#{num}" : ''
   end
@@ -472,6 +474,10 @@ class AquaLotBuilder
   sql
 
   def framed_costs
-    @framed_costs ||= DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
+    @framed_costs ||= if spec_id
+      DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
+    else
+      Array.new(2)
+    end
   end
 end

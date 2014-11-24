@@ -35,7 +35,12 @@ class DB
 
     def log(statement)
       start = Time.now
-      result = yield
+      begin
+        result = yield
+      rescue => e
+        puts statement
+        raise e
+      end
       delta = (Time.now - start) * 1_000
       statement = statement.gsub(/--.*$/, '').gsub(/\s+/, ' ').strip
       puts format("SQL (%.1fms) '%s'", delta, statement)
@@ -48,7 +53,7 @@ class DB
 
     def encode_type(val)
       case val
-      when String then "'#{val}'"
+      when String then "'#{val.gsub("'", "''")}'"
       when Time then encode_time(val)
       else val
       end

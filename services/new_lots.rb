@@ -53,10 +53,10 @@ class NewLots
   def update_aqua
     logger.info 'Передача лотов в АКВа'
     deliveries = errors = 0
-    AquaLot.pending.first(10).each do |lot|
+    AquaLot.pending.each do |lot|
       send_lot(lot) ? deliveries += 1 : errors += 1
     end
-    return if successes.zero? && errors.zero?
+    return if deliveries.zero? && errors.zero?
     logger.info "  Успешно: #{deliveries}, с ошибками: #{errors}"
   end
 
@@ -65,7 +65,7 @@ class NewLots
   end
 
   def build_data(lot)
-    lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.exec_spec_guid)
+    lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.spec_guid)
     return false unless data = get_lot_data(lot_builder, lot)
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }

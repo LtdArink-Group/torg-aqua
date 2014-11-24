@@ -4,7 +4,7 @@ require 'aqua/lots_endpoint'
 require 'webmock'
 require 'vcr'
 
-GUID = ['A7245F5FA1C3E92F72E60D102021AA47'].pack('H*')
+GUID = ['86C7DEF9C6DF82BD61B4799DE52B4F3A'].pack('H*')
 
 VCR.configure do |c|
   c.cassette_library_dir = 'fixtures/vcr_cassettes'
@@ -27,7 +27,7 @@ namespace :aqua do
   end
 
   desc 'New project'
-  task :all_new do
+  task :new_lot do
     send_lot { |_| }
   end
 

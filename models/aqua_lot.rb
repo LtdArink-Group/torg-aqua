@@ -6,23 +6,24 @@ class AquaLot < Model
     CONSISTENT = 'C'
   end
 
-  attributes :id, :plan_spec_guid, :spec_guid
+  attr_accessor :id
+  attr_reader :plan_spec_guid, :spec_guid
 
   PENDING_SQL = <<-sql
-    select al.plan_spec_guid, al.spec_guid
+    select al.id, al.plan_spec_guid, al.spec_guid
       from #{table} al
       where al.state = '#{State::PENDING}'
   sql
 
   def self.pending
     DB.query_all(PENDING_SQL).map do |values|
-      AquaLot.new.tap { |lot| lot.values = values }
+      AquaLot.new(values[1], values[2]).tap { |lot| lot.id = values[0] }
     end
   end
 
-  def initialize(plan_spec_guid, spec_guid)
-    @plan_spec_guid = DB.guid(plan_spec_guid)
-    @spec_guid = DB.guid(spec_guid)
+  def initialize(plan_spec_guid = nil, spec_guid = nil)
+    @plan_spec_guid = plan_spec_guid
+    @spec_guid = spec_guid
   end
 
   def pending
@@ -34,8 +35,6 @@ class AquaLot < Model
   end
 
   private
-
-  attr_reader :plan_spec_guid, :spec_guid
 
   def table
     self.class.table
@@ -65,7 +64,7 @@ class AquaLot < Model
   sql
 
   def merge_zzc(state)
-    DB.exec(MERGE_ZZC_SQL, plan_spec_guid, spec_guid, state)
+    DB.exec(MERGE_ZZC_SQL, DB.guid(plan_spec_guid), DB.guid(spec_guid), state, state)
     DB.commit
   end
 
@@ -81,7 +80,7 @@ class AquaLot < Model
   sql
 
   def merge(state)
-    DB.exec(MERGE_SQL, plan_spec_guid, state)
+    DB.exec(MERGE_SQL, DB.guid(plan_spec_guid), state, state)
     DB.commit
   end
 end
