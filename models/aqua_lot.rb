@@ -6,24 +6,24 @@ class AquaLot < Model
     CONSISTENT = 'C'
   end
 
-  attr_accessor :id
-  attr_reader :plan_spec_guid, :spec_guid
+  attr_reader :id, :plan_spec_guid, :spec_guid
 
   PENDING_SQL = <<-sql
-    select al.id, al.plan_spec_guid, al.spec_guid
+    select al.plan_spec_guid, al.spec_guid, al.id
       from #{table} al
       where al.state = '#{State::PENDING}'
   sql
 
   def self.pending
     DB.query_all(PENDING_SQL).map do |values|
-      AquaLot.new(values[1], values[2]).tap { |lot| lot.id = values[0] }
+      AquaLot.new(*values)
     end
   end
 
-  def initialize(plan_spec_guid = nil, spec_guid = nil)
+  def initialize(plan_spec_guid, spec_guid, id = nil)
     @plan_spec_guid = plan_spec_guid
     @spec_guid = spec_guid
+    @id = id
   end
 
   def pending
