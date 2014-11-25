@@ -5,17 +5,37 @@ require 'models/mapping/project_department'
 require 'services/loggers'
 
 class Projects
-  def self.sync
-    new.tap do |s|
-      begin
-        s.sync
-      rescue Exception => e
-        s.logger.fatal "#{e.class}. #{e.message}\n#{e.backtrace.join("\n")}"
-        Airbrake.notify(e)
-        raise e
+  class << self
+    def sync
+      new.tap do |s|
+        begin
+          s.sync
+        rescue Exception => e
+          s.logger.fatal "#{e.class}. #{e.message}\n#{e.backtrace.join("\n")}"
+          Airbrake.notify(e)
+          raise e
+        end
+      end
+    end
+
+    def processed_date
+      if date = AppVariable.lookup(PROCESSED_DATE_KEY)
+        Date.strptime(date, '%d.%m.%Y')
+      else
+        Configuration.integration.project.start_date
+      end
+    end
+
+    def last_sync_time
+      if time = AppVariable.lookup(LAST_SYNC_TIME_KEY)
+        time
+      else
+        Configuration.integration.project.start_date
       end
     end
   end
+
+  attr_accessor :logger
 
   def initialize
     @logger = Loggers.projects_logger
@@ -33,11 +53,10 @@ class Projects
     end
   end
 
-  attr_accessor :logger
-
   private
 
-  VARIABLE_KEY = 'processed_date.project'
+  PROCESSED_DATE_KEY = 'projects.processed_date'
+  LAST_SYNC_TIME_KEY = 'projects.last_sync_time'
   NO_MATCH_DEPART = 'Не удалось найти заказчика КСАЗД для id: '
 
   def start_date
@@ -57,6 +76,7 @@ class Projects
       InvestProjectName.merge(*params(project))
     end
     self.processed_date = yesterday
+    self.last_sync_time = Time.now
     logger.info "  Обработано проектов: #{projects.size}"
   end
 
@@ -73,15 +93,11 @@ class Projects
   end
 
   def processed_date
-    if date = AppVariable.lookup(VARIABLE_KEY)
-      Date.strptime(date, '%d.%m.%Y')
-    else
-      Configuration.integration.project.start_date
-    end
+    self.class.processed_date
   end
 
   def processed_date=(date)
-    AppVariable.merge(VARIABLE_KEY, date)
+    AppVariable.merge(PROCESSED_DATE_KEY, date)
   end
 
   def error(message)
@@ -90,6 +106,10 @@ class Projects
     else
       logger.error message
     end
+  end
+
+  def last_sync_time=(time)
+    AppVariable.merge(LAST_SYNC_TIME_KEY, time)
   end
 
   def format_date(date)

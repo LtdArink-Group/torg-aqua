@@ -1,0 +1,25 @@
+doctype html
+html
+  head lang="ru"
+    meta charset="utf-8"
+    meta name="viewport" content="width=device-width, initial-scale=1"
+    title Лог синхронизации КСАЗД - АКВА
+    link href="/assets/application.css" rel="stylesheet"
+
+  body
+    header
+      .container Лог передачи изменений из ИС КСАЗД в ИС АКВа
+    main.container
+      .block ng-app="app"
+        == yield
+    footer
+      .container &copy; 2014 ОАО "РАО ЭС Востока"
+
+    script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.3/angular.min.js"
+    script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js'
+    script src="/assets/angular-charts.min.js"
+    script src="/assets/application.js"
+    script src="/assets/chart_controller.js"
+    script src="/assets/users_controller.js"
+    script src="/assets/projects_controller.js"
+    script src="/assets/lots_controller.js"

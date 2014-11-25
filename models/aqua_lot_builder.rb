@@ -184,7 +184,7 @@ class AquaLotBuilder
     ksazd_id = plan_spec.customer_id
     root_id = Department.root(ksazd_id)
     Department.lookup(root_id) or
-      fail "Не удалось найти заказчика АКВА для id: #{ksazd_id}"
+      fail "Не удалось найти заказчика АКВА для id #{ksazd_id}"
   end
 
   def invest_project
@@ -218,7 +218,7 @@ class AquaLotBuilder
   def zkurator
     ksazd_id = plan_spec.monitor_service_id
     value = MonitorService.lookup(ksazd_id) or
-      fail "Не удалось найти куратора АКВА для id: #{ksazd_id}"
+      fail "Не удалось найти куратора АКВА для id #{ksazd_id}"
     sprintf('%03d', value)
   end
 

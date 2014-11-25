@@ -29,6 +29,10 @@ class Model
       @where = hash
     end
 
+    def count
+      DB.query_value("select count(*) from #{table}").to_i
+    end
+
     def find(*ids)
       model = new(*ids).tap(&:load)
       model.values ? model : nil
@@ -72,7 +76,7 @@ class Model
   end
 
   def load
-    @values = DB.query_first_row(sql)
+    @values = DB.query_first_row(load_sql)
   end
 
   attr_accessor :values
@@ -100,7 +104,7 @@ class Model
     end.join
   end
 
-  def sql
+  def load_sql
     "select #{fields} from #{self.class.table} " \
     "where #{id_conditions}#{additional_conditions}"
   end

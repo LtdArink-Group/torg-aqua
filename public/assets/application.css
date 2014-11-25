@@ -25,8 +25,12 @@ body > footer {
   margin: 0 auto;
 }
 
-section > header {
-  font-weight: bold;
+h1 {
+  font-size: 1.5em;
+}
+
+h1:first-child {
+  margin-top: 0;
 }
 
 .block {
@@ -36,22 +40,11 @@ section > header {
   border: 1px solid lightgray;
 }
 
+.danger {
+  color: red;
+}
+
 .chart {
   height: 300px;
   width: 500px;
-}
-
-#errors {
-  width: 300px;
-  float: left;
-  margin-right: 20px;
-}
-
-#graph {
-  width: 800px;
-  float: left;
-}
-
-#details {
-  clear: both;
 }

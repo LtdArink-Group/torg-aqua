@@ -15,9 +15,7 @@ class AquaLot < Model
   sql
 
   def self.pending
-    DB.query_all(PENDING_SQL).map do |values|
-      AquaLot.new(*values)
-    end
+    DB.query_all(PENDING_SQL).map { |values| AquaLot.new(*values) }
   end
 
   def initialize(plan_spec_guid, spec_guid, id = nil)

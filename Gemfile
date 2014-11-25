@@ -7,6 +7,7 @@ gem 'thin'
 gem 'savon'
 gem 'settingslogic'
 gem 'airbrake'
+gem 'slim'
 
 group :development do
   gem 'rake'
