@@ -5,6 +5,9 @@ require 'models/mapping/project_department'
 require 'services/loggers'
 
 class Projects
+  PROCESSED_DATE_KEY = 'projects.processed_date'
+  LAST_SYNC_TIME_KEY = 'projects.last_sync_time'
+
   class << self
     def sync
       new.tap do |s|
@@ -49,10 +52,6 @@ class Projects
 
   private
 
-  PROCESSED_DATE_KEY = 'projects.processed_date'
-  LAST_SYNC_TIME_KEY = 'projects.last_sync_time'
-  NO_MATCH_DEPART = 'Не удалось найти заказчика КСАЗД для id: '
-
   def start_date
     @start_date ||= format_date(processed_date + 1)
   end
@@ -85,7 +84,8 @@ class Projects
   end
 
   def department(aqua_id)
-    ProjectDepartment.lookup(aqua_id) or fail NO_MATCH_DEPART + aqua_id.to_s
+    ProjectDepartment.lookup(aqua_id) or
+      fail "Не удалось найти заказчика КСАЗД для id #{aqua_id.to_s}"
   end
 
   def processed_date

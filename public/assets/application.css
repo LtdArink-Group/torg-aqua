@@ -1,5 +1,5 @@
-html, button, input, select, textarea {
-  font-family: Candara, Calibri, Corbel, sans-serif;
+html, body, p, button, input, select, textarea {
+  font-family: Calibri, Candara, Corbel, sans-serif;
   font-weight: 300;
   font-size: 18px;
 }
@@ -40,8 +40,28 @@ h1:first-child {
   border: 1px solid lightgray;
 }
 
+.good {
+  color: green;
+}
+
 .danger {
   color: red;
+}
+
+table {
+  border: 0 solid lightgray;
+  border-width: 1px 1px 0 0;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 0 solid lightgray;
+  border-width: 0 0 1px 1px;
+  padding: 4px;
+}
+
+td {
+  font-size: 0.9em;
 }
 
 .chart {

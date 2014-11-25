@@ -2,26 +2,35 @@ h1 Инвестиционные проекты АКВа
 p ng-controller="ProjectsController as projects"
   ' Количество: {{projects.count}}.
   ' Последние изменения были {{projects.processedDate | date:'dd.MM.yyyy'}}
-  ' (синхронизовано
+  ' (последняя синхронизация
   span class="{{projects.outdated}}"
     | {{projects.lastSyncTime | date:'dd.MM.yyyy в HH:mm'}}
   | )
 h1 Лоты
-p ng-controller="LotsController as lots"
-  ' Всего: {{lots.count}}, не обновлены в АКВа:
-  span.danger
-    | {{lots.pending}}
-table
-  tr
-    th Спецификация
-    th title="Закрытый запрос цен" ЗЗЦ
-    th title="Первая попытка передачи" Время
-    th Ошибка
-  tr
-    td 2C77FA350C3E03979C536383477F6CE5
-    td
-    td: time 13.04.2014 15:00
-    td КСАЗД: Не удалось найти куратора АКВА для id 200024
+div ng-controller="LotsController as lots"
+  p 
+    ' Количество: {{lots.count}}. Не перенесены в АКВа:
+    span> class="{{lots.consistent}}"
+      | {{lots.pendingCount}}
+    ' (последняя синхронизация
+    span class="{{lots.outdated}}"
+      | {{lots.lastSyncTime | date:'dd.MM.yyyy в HH:mm'}}
+    | )
+  table
+    tr
+      th Спецификация
+      th title="Закрытый запрос цен" ЗЗЦ
+      th title="Первая попытка передачи" Время
+      th Ошибка
+    tr ng-repeat="lot in lots.pending"
+      td: a href="http://ksazd.rao-esv.ru/plan_spec_history/{{lot.planSpecGuid}}"
+        | {{lot.planSpecGuid}}
+      td
+        | {{lot.specGuid}}
+      td: time
+        | {{lot.time | date:'dd.MM.yyyy HH:mm'}}
+      td
+        | {{lot.message}}
 h1 История
 div ng-controller="ChartController"
   .chart data-ac-chart="'bar'" data-ac-data="data" data-ac-config="config"

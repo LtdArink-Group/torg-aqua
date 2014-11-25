@@ -8,10 +8,21 @@ require 'services/syncronizer'
 require 'aqua/lots_endpoint'
 
 class NewLots
+  LAST_SYNC_TIME_KEY = 'lots.last_sync_time'
   PROCESSED = 53
 
-  def self.process
-    Syncronizer.perform { new.process }
+  class << self
+    def process
+      Syncronizer.perform { new.process }
+    end
+
+    def last_sync_time
+      if time = AppVariable.lookup(LAST_SYNC_TIME_KEY)
+        time
+      else
+        Configuration.integration.lot.start_time
+      end
+    end
   end
 
   attr_reader :logger
@@ -23,6 +34,7 @@ class NewLots
   def process
     detect_changes
     update_aqua
+    self.last_sync_time = Time.now
   rescue Exception => e
     logger.fatal "#{e.class}. #{e.message}\n#{e.backtrace.join("\n")}"
     Airbrake.notify(e)
@@ -101,5 +113,9 @@ class NewLots
 
   def delivery_attributes(id, state, message = '')
     { aqua_lot_id: id, state: state, attempted_at: Time.now, message: message }
+  end
+
+  def last_sync_time=(time)
+    AppVariable.merge(LAST_SYNC_TIME_KEY, time)
   end
 end

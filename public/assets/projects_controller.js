@@ -5,8 +5,7 @@ function ProjectsController($http) {
   projects.outdated = '';
 
   function outdated() {
-    var diff = (Date.now() - projects.syncAt) / (1000 * 3600 * 24);
-    console.log(diff);
+    var diff = (Date.now() - projects.lastSyncTime) / (1000 * 3600 * 24);
     return (diff > 1) ? 'danger' : '';
   }
 
