@@ -44,13 +44,7 @@ class Projects
   def sync
     logger.info "Обращение к веб-сервису: запрос проектов с #{start_date} по #{yesterday}"
     response = ProjectsEndpoint.query(start_date, yesterday)
-    if response.status == 'S'
-      logger.info "  Получено проектов: #{response.data.size}"
-      projects = select_top_level(response.data)
-      merge(projects) unless projects.empty?
-    else
-      error(response.message)
-    end
+    response.status == 'S' ? process(response.data) : error(response.message)
   end
 
   private
@@ -67,8 +61,11 @@ class Projects
     format_date(Date.today - 1)
   end
 
-  def select_top_level(projects)
-    projects.select { |p| p[:spp_parent].nil? }
+  def process(projects)
+    logger.info "  Получено проектов: #{projects.size}"
+    projects = projects.select { |p| p[:spp_parent].nil? }
+    merge(projects) unless projects.empty?
+    self.last_sync_time = Time.now
   end
 
   def merge(projects)
@@ -76,7 +73,6 @@ class Projects
       InvestProjectName.merge(*params(project))
     end
     self.processed_date = yesterday
-    self.last_sync_time = Time.now
     logger.info "  Обработано проектов: #{projects.size}"
   end
 
