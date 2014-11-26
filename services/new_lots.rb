@@ -99,6 +99,11 @@ class NewLots
       message = "АКВА: #{response.status} - #{response.message}"
       delivery_error(lot, message)
     end
+  rescue Net::ReadTimeout => e
+    raise e
+  rescue => error
+    Airbrake.notify(error)
+    delivery_error(lot, "АКВА: #{error.message}")
   end
 
   def delivery_success(lot)
