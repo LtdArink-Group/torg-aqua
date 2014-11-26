@@ -224,7 +224,7 @@ class AquaLotBuilder
 
   def paragraph
     return '' if plan_lot.point_clause.nil?
-    num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0]
+    num = plan_lot.point_clause.scan(/5\.9\.1\.([1-5])/)[0][0]
     num ? "00#{num}" : ''
   end
 

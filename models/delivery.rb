@@ -25,7 +25,7 @@ class Delivery < Model
 
   def self.first_failed(id)
     values = DB.query_first_row(ERROR_SQL, id, id)
-    new(*values)
+    values ? new(*values) : new(Time.parse('2000-01-01'), '')
   end
 
   ALL_SQL = <<-sql
