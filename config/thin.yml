@@ -1,6 +1,6 @@
 --- 
 user: deployer
-group: deployer
+group: sudo
 pid: tmp/thin.pid
 timeout: 30
 wait: 30
@@ -13,4 +13,4 @@ servers: 1
 threaded: true
 no-epoll: true
 daemonize: true
-socket: tmp/thin.sock
+socket: /tmp/ksazd2aqua.sock
