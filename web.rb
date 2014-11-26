@@ -40,3 +40,15 @@ get '/lots.json' do
   }
   json data
 end
+
+def convert_stats(data)
+  data.map { |row| { date: row[0].strftime('%Y-%m-%d'), value: row[1].to_i } }
+end
+
+def stats
+  [ convert_stats(Delivery.all_stats), convert_stats(Delivery.errors_stats) ]
+end
+
+get '/stats.json' do
+  json stats
+end

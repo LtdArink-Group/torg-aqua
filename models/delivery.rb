@@ -7,29 +7,46 @@ class Delivery < Model
     ERROR   = 'E'
   end
 
-  LAST_SUCCESSFUL_SQL = <<-sql
-    select max(attempted_at)
-      from #{table}
-      where state = 'S'
-        and aqua_lot_id = :id
-  sql
-
   ERROR_SQL = <<-sql
+    with successfull as
+      (select nvl(max(attempted_at), date '2000-01-01') as last_date
+        from #{table}
+        where state = 'S'
+        and aqua_lot_id = :id)
     select min(attempted_at),
-           max(message) keep (dense_rank last order by attempted_at)
-      from #{table}
-      where state = 'E'
-        and aqua_lot_id = :id
-        and attempted_at > to_date(:time, 'YYYY-MM-DD HH24:MI:SS')
-      group by aqua_lot_id
+           max(d.message) keep (dense_rank last order by attempted_at)
+      from deliveries d,
+           successfull s
+      where d.state = 'E'
+        and d.aqua_lot_id = :id
+        and d.attempted_at > s.last_date
+      group by d.aqua_lot_id
   sql
 
   def self.first_failed(id)
-    last_successful = DB.query_value(LAST_SUCCESSFUL_SQL, id)
-    time = last_successful ? last_successful : Configuration.integration.lot.start_time
-    time = time.strftime('%Y-%m-%d %H:%M:%S')
-    values = DB.query_first_row(ERROR_SQL, id, time)
+    values = DB.query_first_row(ERROR_SQL, id, id)
     new(*values)
+  end
+
+  ALL_SQL = <<-sql
+    select trunc(attempted_at) as "date", count(distinct aqua_lot_id) value
+      from #{table}
+      group by trunc(attempted_at)
+  sql
+
+  def self.all_stats
+    DB.query_all(ALL_SQL)
+  end
+
+  ERRORS_SQL = <<-sql
+    select trunc(attempted_at) as "date", count(distinct aqua_lot_id) value
+      from #{table}
+      where state = 'E'
+      group by trunc(attempted_at)
+  sql
+
+  def self.errors_stats
+    DB.query_all(ERRORS_SQL)
   end
 
   attr_reader :attempted_at, :message

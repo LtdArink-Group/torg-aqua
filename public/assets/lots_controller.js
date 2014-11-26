@@ -22,7 +22,7 @@ function LotsController($http) {
     return (diff > 1) ? 'danger' : '';
   }
 
-  $http.get('http://172.30.40.100:9393/lots.json')
+  $http.get('/lots.json')
     .success(function (data) {
       lots.count = data.count;
       lots.pendingCount = data.pending.length;

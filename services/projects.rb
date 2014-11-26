@@ -48,6 +48,7 @@ class Projects
     logger.info "Обращение к веб-сервису: запрос проектов с #{start_date} по #{yesterday}"
     response = ProjectsEndpoint.query(start_date, yesterday)
     response.status == 'S' ? process(response.data) : error(response.message)
+    self.last_sync_time = Time.now
   end
 
   private
@@ -64,7 +65,6 @@ class Projects
     logger.info "  Получено проектов: #{projects.size}"
     projects = projects.select { |p| p[:spp_parent].nil? }
     merge(projects) unless projects.empty?
-    self.last_sync_time = Time.now
   end
 
   def merge(projects)
@@ -85,7 +85,7 @@ class Projects
 
   def department(aqua_id)
     ProjectDepartment.lookup(aqua_id) or
-      fail "Не удалось найти заказчика КСАЗД для id #{aqua_id.to_s}"
+      fail "Не удалось найти заказчика КСАЗД для id #{aqua_id}"
   end
 
   def processed_date

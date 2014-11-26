@@ -9,7 +9,7 @@ function ProjectsController($http) {
     return (diff > 1) ? 'danger' : '';
   }
 
-  $http.get('http://172.30.40.100:9393/projects.json')
+  $http.get('/projects.json')
     .success(function (data) {
       projects.count = data.count;
       projects.processedDate = Date.parse(data.processedDate);

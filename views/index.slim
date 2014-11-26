@@ -32,5 +32,7 @@ div ng-controller="LotsController as lots"
       td
         | {{lot.message}}
 h1 История
-div ng-controller="ChartController"
-  .chart data-ac-chart="'bar'" data-ac-data="data" data-ac-config="config"
+#legend
+  span> style="color: #36C293;" &mdash; Всего
+  span style="color: #E2685E;" &mdash; Ошибки
+#history-chart
