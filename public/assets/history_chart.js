@@ -3,8 +3,6 @@ d3.json('/stats.json', function(data) {
     data[i] = convert_dates(data[i], 'date');
   }
   data_graphic({
-    // title: "Изменения лотов",
-    // description: "Yearly UFO sightings from the year 1945 to 2010.",
     data: data,
     width: 1160,
     height: 300,

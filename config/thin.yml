@@ -10,7 +10,7 @@ require: []
 environment: production
 max_persistent_conns: 512
 servers: 1
-threaded: true
+threaded: false
 no-epoll: true
 daemonize: true
 socket: /tmp/ksazd2aqua.sock
