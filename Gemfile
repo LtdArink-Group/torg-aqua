@@ -8,7 +8,6 @@ gem 'savon'
 gem 'settingslogic'
 gem 'airbrake'
 gem 'slim'
-gem 'oj'
 
 group :development do
   gem 'rake'
