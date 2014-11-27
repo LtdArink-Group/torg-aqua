@@ -8,6 +8,7 @@ require 'services/projects'
 require 'services/new_lots'
 
 get '/' do
+  headers 'X-UA-Compatible' => 'IE=edge,chrome=1'
   slim :index
 end
 
