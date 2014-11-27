@@ -7,11 +7,11 @@ html
     link href="/assets/metricsgraphics.css" rel="stylesheet"
     link href="/assets/application.css" rel="stylesheet"
 
-  body
+  body ng-app="app"
     header
       .container Лог передачи изменений из ИС КСАЗД в ИС АКВа
     main.container
-      .block ng-app="app"
+      .block
         == yield
     footer
       .container &copy; 2014 ОАО "РАО ЭС Востока"
@@ -21,6 +21,7 @@ html
     script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js'
     script src="/assets/metricsgraphics.min.js"
     script src="/assets/application.js"
+    script src="/assets/adjust_service.js"
     script src="/assets/projects_controller.js"
     script src="/assets/lots_controller.js"
     script src="/assets/history_chart.js"

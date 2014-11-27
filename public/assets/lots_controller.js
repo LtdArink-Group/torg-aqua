@@ -1,4 +1,4 @@
-function LotsController($http) {
+function LotsController($http, AdjustService) {
   var lots = this;
   lots.count = lots.pendingCount = 0;
   lots.consistent = 'good';
@@ -7,7 +7,7 @@ function LotsController($http) {
 
   function convert_times(data) {
     data = data.map(function(d){
-      d['time'] = Date.parse(d['time']);
+      d['time'] = Date.parse(AdjustService.date(d['time']));
       return d;
     })
     return data;
@@ -26,7 +26,7 @@ function LotsController($http) {
     .success(function (data) {
       lots.count = data.count;
       lots.pendingCount = data.pending.length;
-      lots.lastSyncTime = Date.parse(data.lastSyncTime);
+      lots.lastSyncTime = Date.parse(AdjustService.date(data.lastSyncTime));
       lots.pending = convert_times(data.pending);
       lots.consistent = consistent();
       lots.outdated = outdated();
