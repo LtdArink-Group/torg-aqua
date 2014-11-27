@@ -234,7 +234,8 @@ class AquaLotBuilder
 
   def prn1
     [].tap do |a|
-      if reason = lot.non_public_reason
+      reason = lot.non_public_reason ? lot.non_public_reason.read : ''
+      unless reason.empty?
         a << reason
       end
       if id = plan_lot.protocol_id
@@ -380,7 +381,7 @@ class AquaLotBuilder
   def spec_id
     @spec_id ||=
       if spec_guid
-        DB.query_value(SPEC_ID_SQL, spec_guid).to_i
+        DB.query_value(SPEC_ID_SQL, DB.guid(spec_guid)).to_i
       else
         values = DB.query_first_row(SPEC_ID_FROM_PLAN_SQL, plan_spec_id)
         values[0].to_i if values
@@ -411,8 +412,8 @@ class AquaLotBuilder
   sql
 
   def additional_cost_sum
-    guid = DB.guid(plan_lot.additional_to)
-    DB.query_value(ADDITIONAL_COST_SUM_SQL, guid, plan_lot.additional_num)
+    DB.query_value(ADDITIONAL_COST_SUM_SQL, DB.guid(plan_lot.additional_to),
+                   plan_lot.additional_num)
   end
 
   ADDITIONAL_TO_SQL = <<-sql
@@ -445,7 +446,9 @@ class AquaLotBuilder
   end
 
   PLAN_SPEC_AMOUNTS_SQL = <<-sql
-    select a.amount_finance_nds, a.amount_mastery, a.amount_mastery_nds
+    select nvl(a.amount_finance_nds, 0),
+           nvl(a.amount_mastery, 0),
+           nvl(a.amount_mastery_nds, 0)
       from ksazd.plan_spec_amounts a
       where a.plan_specification_id = :id
       order by a.year

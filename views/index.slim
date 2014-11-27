@@ -18,15 +18,14 @@ div ng-controller="LotsController as lots"
     | )
   table
     tr
-      th Спецификация
-      th title="Закрытый запрос цен" ЗЗЦ
-      th title="Первая попытка передачи" Время
+      th Спецификация / ЗЗЦ
+      th title="Первая попытка передачи" style="width: 110px;" Время
       th Ошибка
     tr ng-repeat="lot in lots.pending"
-      td: a href="http://ksazd.rao-esv.ru/plan_spec_history/{{lot.planSpecGuid}}"
-        | {{lot.planSpecGuid}}
       td
-        | {{lot.specGuid}}
+        a> href="http://ksazd.rao-esv.ru/plan_spec_history/{{lot.planSpecGuid}}"
+          | {{lot.planSpecGuid}}
+        | {{lot.specGuid ? (' ' + lot.specGuid) : ''}}
       td: time
         | {{lot.time | date:'dd.MM.yyyy HH:mm'}}
       td

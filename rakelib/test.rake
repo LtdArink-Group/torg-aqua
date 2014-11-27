@@ -1,7 +1,9 @@
 require 'awesome_print'
+require 'pry'
 require 'pp'
 
-PLAN_SPEC_GUID = ['810F1FA57B5174E334FF9FAE9B0F9AB4'].pack('H*')
+PLAN_SPEC_GUID = ['684DD170A690AA34885AC334F767097D'].pack('H*')
+SPEC_GUID = ['49338FF420787E52722F0C9068FF9185'].pack('H*')
 
 namespace :test do
   task :guid do
@@ -16,7 +18,7 @@ namespace :test do
   desc 'Aqua lot test'
   task :aqua_lot do
     require 'models/aqua_lot_builder'
-    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, nil)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, SPEC_GUID)
     ap lot_builder.to_h
   end
 

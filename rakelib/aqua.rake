@@ -4,7 +4,7 @@ require 'aqua/lots_endpoint'
 require 'webmock'
 require 'vcr'
 
-GUID = ['86C7DEF9C6DF82BD61B4799DE52B4F3A'].pack('H*')
+GUID = ['8F8BC8F234C5820A717FE850D9BA3ED4'].pack('H*')
 
 VCR.configure do |c|
   c.cassette_library_dir = 'fixtures/vcr_cassettes'
@@ -20,10 +20,10 @@ namespace :aqua do
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
     yield data
     response = LotsEndpoint.send('I_LOTS' => { 'item' => data })
-    # VCR.use_cassette('lots') do
+    VCR.use_cassette('lots') do
       puts "response status: #{response.status}"
       puts response.message if response.message
-    # end
+    end
   end
 
   desc 'New project'

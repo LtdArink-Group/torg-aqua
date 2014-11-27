@@ -27,7 +27,7 @@ class ContractorsListBuilder
         c['ZNUMC1C'] = contractor.id
         c['PARTNER_NAME'] = contractor.fullname
         c['INN'] = contractor.inn
-        c['KPP'] = contractor.kpp
+        c['KPP'] = contractor.kpp || ''
         c['PLANU'] = 'X'
       end
     end
@@ -39,7 +39,7 @@ class ContractorsListBuilder
         c['ZNUMC1C'] = offer.contractor.id
         c['PARTNER_NAME'] = offer.contractor.fullname
         c['INN'] = offer.contractor.inn
-        c['KPP'] = offer.contractor.kpp
+        c['KPP'] = offer.contractor.kpp || ''
         c['PODZA'] = 'X'
         c['OTKL'] = 'X' if offer.status_id == STATUS_DECLINED
         c['ZOZ'] = 'X' if offer.type_id == TYPE_RECALL
