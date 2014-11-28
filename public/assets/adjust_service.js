@@ -1,6 +1,7 @@
 function AdjustService() {
   function date(date) {
-    return date.replace(/ \+/,'+').replace(' ','T');
+    var str = date.replace(/ \+/,'+').replace(' ','T');
+    return str.slice(0,22) + ':' + str.slice(22);
   }
 
   this.date = date;
