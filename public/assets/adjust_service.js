@@ -1,6 +1,6 @@
 function AdjustService() {
   function date(date) {
-    return date.substring(0, 16).replace(' ', 'T');
+    return date.replace(/ \+/,'+').replace(' ','T');
   }
 
   this.date = date;

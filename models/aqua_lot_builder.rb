@@ -218,7 +218,7 @@ class AquaLotBuilder
   def zkurator
     ksazd_id = plan_spec.monitor_service_id
     value = MonitorService.lookup(ksazd_id) or
-      fail "Не удалось найти куратора АКВА для id #{ksazd_id}"
+      fail "Не удалось найти подразделение-куратор АКВА для id #{ksazd_id}"
     sprintf('%03d', value)
   end
 
