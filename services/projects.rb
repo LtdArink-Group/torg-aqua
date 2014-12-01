@@ -22,7 +22,7 @@ class Projects
     end
 
     def processed_date
-      if date = AppVariable.lookup(PROCESSED_DATE_KEY)
+      if date = AppVariable.find(PROCESSED_DATE_KEY).value
         Date.strptime(date, '%d.%m.%Y')
       else
         Configuration.integration.project.start_date
@@ -30,7 +30,7 @@ class Projects
     end
 
     def last_sync_time
-      if time = AppVariable.lookup(LAST_SYNC_TIME_KEY)
+      if time = AppVariable.find(LAST_SYNC_TIME_KEY).value
         time
       else
         Configuration.integration.project.start_date

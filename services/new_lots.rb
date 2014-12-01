@@ -17,7 +17,7 @@ class NewLots
     end
 
     def last_sync_time
-      if time = AppVariable.lookup(LAST_SYNC_TIME_KEY)
+      if time = AppVariable.find(LAST_SYNC_TIME_KEY).value
         time
       else
         Configuration.integration.lot.start_time
