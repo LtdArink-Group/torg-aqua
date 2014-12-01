@@ -117,7 +117,7 @@ class AquaLotBuilder
       # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
       'P_REASON' => plan_lot.tender_type_explanations || '',
       # Обоснование (документ)
-      'P_REASON_DOC' => plan_lot.explanations_doc.slice(0, 120) || '',
+      'P_REASON_DOC' => p_reason_doc,
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
@@ -220,6 +220,10 @@ class AquaLotBuilder
     value = MonitorService.lookup(ksazd_id) or
       fail "Не удалось найти подразделение-куратор АКВА для id #{ksazd_id}"
     sprintf('%03d', value)
+  end
+
+  def p_reason_doc
+    (doc = plan_lot.explanations_doc) ? doc.slice(0, 120) : ''
   end
 
   def paragraph
