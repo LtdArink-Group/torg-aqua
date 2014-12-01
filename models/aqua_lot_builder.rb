@@ -117,7 +117,7 @@ class AquaLotBuilder
       # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
       'P_REASON' => plan_lot.tender_type_explanations || '',
       # Обоснование (документ)
-      'P_REASON_DOC' => plan_lot.explanations_doc || '',
+      'P_REASON_DOC' => plan_lot.explanations_doc.slice(0, 120) || '',
       # Пункт положения
       'P_PARAGRAPH' => paragraph,
       # Количество
