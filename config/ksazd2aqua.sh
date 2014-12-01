@@ -36,11 +36,11 @@ start)
   run "$CMD"
   ;;
 stop)
-  bin/stop && exit 0
+  run "cd $APP_ROOT; bin/stop" && exit 0
   echo >&2 "Not running"
   ;;
 restart|reload)
-  bin/reload && echo reloaded OK && exit 0
+  run "cd $APP_ROOT; bin/restart" && echo reloaded OK && exit 0
   echo >&2 "Couldn't reload, starting '$CMD' instead"
   run "$CMD"
   ;;
