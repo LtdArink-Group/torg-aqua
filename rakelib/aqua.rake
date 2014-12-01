@@ -4,7 +4,8 @@ require 'aqua/lots_endpoint'
 require 'webmock'
 require 'vcr'
 
-GUID = ['8F8BC8F234C5820A717FE850D9BA3ED4'].pack('H*')
+PLAN_SPEC_GUID = ['8F8BC8F234C5820A717FE850D9BA3ED4'].pack('H*')
+SPEC_GUID = nil
 
 VCR.configure do |c|
   c.cassette_library_dir = 'fixtures/vcr_cassettes'
@@ -14,7 +15,7 @@ end
 
 namespace :aqua do
   def send_lot
-    lot_builder = AquaLotBuilder.new(GUID, nil)
+    lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, SPEC_GUID)
     data = lot_builder.to_h
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
