@@ -13,7 +13,7 @@ set -e
 # Feel free to change any of the following variables for your app:
 TIMEOUT=${TIMEOUT-60}
 APP_ROOT=/home/deployer/apps/ksazd2aqua
-PID=$APP_ROOT/tmp/thin.pid
+PID=$APP_ROOT/tmp/thin.0.pid
 CMD="cd $APP_ROOT; bin/start"
 AS_USER=deployer
 set -u
