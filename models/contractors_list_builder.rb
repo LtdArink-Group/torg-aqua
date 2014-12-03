@@ -31,6 +31,35 @@ class ContractorsListBuilder
         c['PLANU'] = 'X'
       end
     end
+
+    # TODO: Remove after test
+    if contractors.size < 3
+      contractors[0].tap do |c|
+        c['ZNUMC1C'] = 0
+        c['PARTNER_NAME'] = '-'
+        c['INN'] = '-'
+        c['KPP'] = '-'
+        c['PLANU'] = 'X'
+      end
+    end
+    if contractors.size < 3
+      contractors[1].tap do |c|
+        c['ZNUMC1C'] = 1
+        c['PARTNER_NAME'] = '--'
+        c['INN'] = '--'
+        c['KPP'] = '--'
+        c['PLANU'] = 'X'
+      end
+    end
+    if contractors.size < 3
+      contractors[3].tap do |c|
+        c['ZNUMC1C'] = 3
+        c['PARTNER_NAME'] = '---'
+        c['INN'] = '---'
+        c['KPP'] = '---'
+        c['PLANU'] = 'X'
+      end
+    end
   end
 
   def load_exec_contractors
