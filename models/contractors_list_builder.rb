@@ -54,9 +54,7 @@ class ContractorsListBuilder
     if contractors.size < 3
       contractors[3].tap do |c|
         c['ZNUMC1C'] = 3
-        c['PARTNER_NAME'] = '---'
-        c['INN'] = '---'
-        c['KPP'] = '---'
+        c['PARTNER_NAME'] = 'иностранный контрагент'
         c['PLANU'] = 'X'
       end
     end

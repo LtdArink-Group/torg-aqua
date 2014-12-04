@@ -250,7 +250,7 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 					<xsd:element name="PARTNER_NAME" type="tns:char255" />
 					<xsd:element name="INN" type="tns:char14" />
 					<xsd:element name="KPP" type="tns:char9" />
-					<xsd:element name="ZNUMC1C" type="tns:char10" />
+					<xsd:element name="ZNUMC1C" type="tns:char40" />
 					<xsd:element name="ALT_OFFER" type="tns:char1" />
 					<xsd:element name="PLANU" type="tns:char1" />
 					<xsd:element name="REGZP" type="tns:char1" />
@@ -338,9 +338,27 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 			</wsdl:fault>
 		</wsdl:operation>
 	</wsdl:binding>
+	<wsdl:binding name="ZPPM_LOTS_KSAZD_LOAD_BND_soap12" type="tns:ZPPM_LOTS_KSAZD_LOAD">
+		<wsoap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+		<wsdl:operation name="ZFM_PPM_LOTS_KSAZD_IN_WS">
+			<wsoap12:operation soapAction="urn:sap-com:document:sap:rfc:functions:ZPPM_LOTS_KSAZD_LOAD:ZFM_PPM_LOTS_KSAZD_IN_WSRequest" style="document" />
+			<wsdl:input>
+				<wsoap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<wsoap12:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception">
+				<wsoap12:fault name="ZFM_PPM_LOTS_KSAZD_IN_WS.Exception" use="literal" />
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
 	<wsdl:service name="ZPPM_LOTS_KSAZD_LOAD_EP">
 		<wsdl:port name="ZPPM_LOTS_KSAZD_LOAD_BND" binding="tns:ZPPM_LOTS_KSAZD_LOAD_BND">
 			<soap:address location="http://akva.gidroogk.com:8090/er2/sap/bc/srt/rfc/sap/zppm_lots_ksazd_load/400/zppm_lots_ksazd_load_ep/zppm_lots_ksazd_load_bnd" />
+		</wsdl:port>
+		<wsdl:port name="ZPPM_LOTS_KSAZD_LOAD_BND_soap12" binding="tns:ZPPM_LOTS_KSAZD_LOAD_BND_soap12">
+			<wsoap12:address location="http://akva.gidroogk.com:8090/er2/sap/bc/srt/rfc/sap/zppm_lots_ksazd_load/400/zppm_lots_ksazd_load_ep/zppm_lots_ksazd_load_bnd" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
