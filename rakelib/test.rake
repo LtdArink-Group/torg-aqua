@@ -2,8 +2,8 @@ require 'awesome_print'
 require 'pry'
 require 'pp'
 
-PLAN_SPEC_GUID = ['684DD170A690AA34885AC334F767097D'].pack('H*')
-SPEC_GUID = ['49338FF420787E52722F0C9068FF9185'].pack('H*')
+PLAN_SPEC_GUID = ['2B4760B8763E05E05DEA72E3574D3E94'].pack('H*')
+SPEC_GUID = nil#['49338FF420787E52722F0C9068FF9185'].pack('H*')
 
 namespace :test do
   task :guid do
@@ -20,6 +20,7 @@ namespace :test do
     require 'models/aqua_lot_builder'
     lot_builder = AquaLotBuilder.new(PLAN_SPEC_GUID, SPEC_GUID)
     ap lot_builder.to_h
+    ap lot_builder.to_h['LNAME'].length
   end
 
   desc 'Contractors list test'

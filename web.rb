@@ -22,13 +22,12 @@ get '/projects.json' do
 end
 
 def pending
-  AquaLot.pending.map do |lot|
-    delivery = Delivery.first_failed(lot.id)
+  AquaLot.pending_with_info.map do |lot|
     {
       planSpecGuid: DB.guid(lot.plan_spec_guid),
       specGuid: DB.guid(lot.spec_guid),
-      time: delivery.attempted_at,
-      message: delivery.message
+      time: lot.start_time,
+      message: lot.message
     }
   end
 end

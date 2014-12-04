@@ -52,7 +52,7 @@ class AquaLotBuilder
       # Внутренний номер инвестиционного проекта
       'SPP' => invest_project || 'T-4070-00083',
       # Название лота
-      'LNAME' => plan_spec.name,
+      'LNAME' => truncate(plan_spec.name, 360),
       # Номер лота
       'LNUM' => format('%d.%d', plan_lot.num_tender, plan_lot.num_lot),
       # Закупка плановая/внеплановая (+ дозакупка)
@@ -142,7 +142,7 @@ class AquaLotBuilder
       # Код валюты
       'L_WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
-      'ZNUMPR' => tender.etp_num || '',
+      'ZNUMPR' => etp_num || '',
       # Номер лота из КСАЗД
       'ZNUMKSAZDP' => format_guid(spec_guid || plan_spec_guid),
       # Номер лота из КСАЗД (исполнение)
@@ -248,6 +248,13 @@ class AquaLotBuilder
     end.join ' / '
   end
 
+  def etp_num
+    if tender.etp_num && tender.etp_num > 99_999_999
+      fail 'Номер процедуры на ЭТП больше 8-и символов' 
+    end
+    tender.etp_num
+  end
+
   # entities --------------------------------------------------------
 
   def plan_spec
@@ -330,6 +337,10 @@ class AquaLotBuilder
 
   def format_cost(cost)
     cost.to_s('F')
+  end
+
+  def truncate(string, length)
+    string[0..(length - 1)] if string
   end
 
   # data access -----------------------------------------------------

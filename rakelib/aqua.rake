@@ -4,8 +4,8 @@ require 'aqua/lots_endpoint'
 require 'webmock'
 require 'vcr'
 
-PLAN_SPEC_GUID = ['8F8BC8F234C5820A717FE850D9BA3ED4'].pack('H*')
-SPEC_GUID = nil
+# PLAN_SPEC_GUID = ['2B4760B8763E05E05DEA72E3574D3E94'].pack('H*')
+# SPEC_GUID = nil
 
 VCR.configure do |c|
   c.cassette_library_dir = 'fixtures/vcr_cassettes'

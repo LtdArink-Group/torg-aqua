@@ -6,7 +6,7 @@ class AquaLot < Model
     CONSISTENT = 'C'
   end
 
-  attr_reader :id, :plan_spec_guid, :spec_guid
+  attr_reader :id, :plan_spec_guid, :spec_guid, :start_time, :message
 
   PENDING_SQL = <<-sql
     select al.plan_spec_guid, al.spec_guid, al.id
@@ -18,10 +18,38 @@ class AquaLot < Model
     DB.query_all(PENDING_SQL).map { |values| AquaLot.new(*values) }
   end
 
-  def initialize(plan_spec_guid, spec_guid, id = nil)
+  PENDING_WITH_INFO_SQL = <<-sql
+    with successfull as
+      (select al.id, nvl(max(d.attempted_at), date '2000-01-01') as last_date
+        from #{table} al,
+             deliveries d
+        where al.id = d.aqua_lot_id (+)
+          and d.state (+) = 'S'
+        group by al.id)
+    select al.plan_spec_guid, al.spec_guid, al.id,
+           min(d.attempted_at),
+           max(d.message) keep (dense_rank last order by d.attempted_at)
+      from #{table} al,
+           deliveries d,
+           successfull s
+      where al.id = d.aqua_lot_id
+        and al.id = s.id
+        and al.state = '#{State::PENDING}'
+        and d.attempted_at > s.last_date
+      group by al.plan_spec_guid, al.spec_guid, al.id
+  sql
+
+  def self.pending_with_info
+    DB.query_all(PENDING_WITH_INFO_SQL).map { |values| AquaLot.new(*values) }
+  end
+
+  def initialize(plan_spec_guid, spec_guid, id = nil,
+                 start_time = nil, message = nil)
     @plan_spec_guid = plan_spec_guid
     @spec_guid = spec_guid
     @id = id
+    @start_time = start_time
+    @message = message
   end
 
   def pending
