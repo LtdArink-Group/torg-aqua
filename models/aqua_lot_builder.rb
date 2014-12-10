@@ -219,11 +219,11 @@ class AquaLotBuilder
   end
 
   def cost_nds
-    spec_guid ? spec.cost_nds : (plan_spec.cost_nds - framed_cost_nds)
+    spec_guid && spec_id ? spec.cost_nds : (plan_spec.cost_nds - framed_cost_nds)
   end
 
   def cost
-    spec_guid ? spec.cost : (plan_spec.cost - framed_cost)
+    spec_guid && spec_id ? spec.cost : (plan_spec.cost - framed_cost)
   end
 
   def zkurator
@@ -244,7 +244,7 @@ class AquaLotBuilder
   end
 
   def qty
-    spec_guid ? spec.qty : plan_spec.qty
+    spec_guid && spec_id ? spec.qty : plan_spec.qty
   end
 
   def prn1
