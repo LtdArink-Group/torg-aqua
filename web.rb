@@ -27,7 +27,13 @@ def pending
       planSpecGuid: DB.guid(lot.plan_spec_guid),
       specGuid: DB.guid(lot.spec_guid),
       time: lot.start_time,
-      message: lot.message
+      message: lot.message,
+      gkpzYear: lot.gkpz_year.to_s,
+      department: lot.department,
+      direction: lot.direction,
+      lotNum: lot.lot_num,
+      specName: lot.spec_name,
+      tenderId: lot.tender_id.to_i.to_s
     }
   end
 end

@@ -58,9 +58,18 @@ th, td {
   border: 0 solid lightgray;
   border-width: 0 0 1px 1px;
   padding: 4px;
+  font-size: 0.85em;
+}
+
+th {
+  text-align: left;
+  background-color: lightgray;
 }
 
 td {
-  font-size: 0.85em;
   vertical-align: top;
+}
+
+.even {
+  background-color: #ddd;
 }

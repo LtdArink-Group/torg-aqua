@@ -13,6 +13,8 @@ class AquaLotBuilder
   ADDITIONAL_RATIO = 0.2   # Дозакупка >< 20%
   CANCELLED        = 15004 # Отменен
   EXCLUDED         = 15007 # Исключен СД
+  TENDER_TYPE_ZZC  = 10014 # Закрытый запрос цен
+  TENDER_TYPE_ORK  = 10018 # Открытый рамочный конкурс
   # ИС АКВа
   STATE_PLAN            = 'P'  # Плановая закупка
   STATE_UNPLAN          = 'V'  # Внеплановая закупка
@@ -33,6 +35,7 @@ class AquaLotBuilder
   def initialize(plan_spec_guid, spec_guid)
     @plan_spec_guid = plan_spec_guid
     @spec_guid = spec_guid
+    @spec_deleted = false
   end
 
   def to_h
@@ -60,7 +63,7 @@ class AquaLotBuilder
       # Статус лота
       'LOTSTATUS' => lotstatus,
       # метка удаления
-      'LOTDEL' => [CANCELLED, EXCLUDED].include?(plan_lot.state) ? 'X' : '',
+      'LOTDEL' => lotdel,
       # Организатор процедуры
       'ORG' => Organizer.lookup(plan_lot.department_id) || AQUA_DZO,
       # Закупочная комиссия
@@ -108,14 +111,14 @@ class AquaLotBuilder
       # Дата окончания поставки товаров, выполнения работ, услуг
       'DATEOP' => format_date(plan_spec.delivery_date_end),
       # Куратор
-      'KURATOR' => plan_spec.curator,
+      'KURATOR' => truncate(plan_spec.curator, 60),
       # Технический куратор
-      'TKURATOR' => plan_spec.tech_curator,
+      'TKURATOR' => truncate(plan_spec.tech_curator, 60),
       # Подраздел ГКПЗ
       'L_FUNBUD' => Subdirection.lookup(plan_spec.direction_id,
                                         plan_lot.subject_type_id),
       # Обоснование (в случае ЕИ или отклонения от регламентных порогов)
-      'P_REASON' => plan_lot.tender_type_explanations || '',
+      'P_REASON' => truncate(plan_lot.tender_type_explanations, 1000) || '',
       # Обоснование (документ)
       'P_REASON_DOC' => p_reason_doc,
       # Пункт положения
@@ -136,9 +139,9 @@ class AquaLotBuilder
       'SEQ' => OTHER,
       # Причины невыполнения сроков объявления о процедуре и вскр. конвертов,
       # Реквизиты протокола ЦЗК в случае отмены закупки
-      'PRN1' => prn1,
+      'PRN1' => truncate(prn1, 500),
       # Причины невыполнения срока заключения договора
-      'PRN2' => lot.non_contract_reason || '',
+      'PRN2' => truncate(prn2, 500),
       # Код валюты
       'L_WAERS' => RUSSIAN_RUBLE,
       # Номер процедуры на ЭТП
@@ -201,6 +204,14 @@ class AquaLotBuilder
     end
   end
 
+  def lotdel
+    if spec_deleted?
+      'X'
+    else
+      [CANCELLED, EXCLUDED].include?(plan_lot.state) ? 'X' : ''
+    end
+  end
+
   def comission
     return '' unless plan_lot.commission_id
     type_id = Commission.find(plan_lot.commission_id).commission_type_id
@@ -246,6 +257,10 @@ class AquaLotBuilder
         a << Protocol.find(id).details
       end
     end.join ' / '
+  end
+
+  def prn2
+    lot.non_contract_reason ? lot.non_contract_reason.read : ''
   end
 
   def etp_num
@@ -324,7 +339,17 @@ class AquaLotBuilder
   def plan_spec_amounts
     @plan_spec_amounts ||= plan_spec_amounts_from_db.tap do |a|
       (5 - a.size).times { a << Array.new(3, ZERO) }
+      a[0] = [cost_nds, cost, cost_nds] if fix_amounts?
     end
+  end
+
+  def spec_deleted?
+    spec_id # need to check for deleted specs
+    @spec_deleted
+  end
+
+  def fix_amounts?
+    [TENDER_TYPE_ZZC, TENDER_TYPE_ORK].include? tender.tender_type_id
   end
 
   def format_date(time)
@@ -396,7 +421,12 @@ class AquaLotBuilder
   def spec_id
     @spec_id ||=
       if spec_guid
-        DB.query_value(SPEC_ID_SQL, DB.guid(spec_guid)).to_i
+        begin
+          DB.query_value(SPEC_ID_SQL, DB.guid(spec_guid)).to_i
+        rescue NoMethodError
+          @spec_deleted = true
+          nil
+        end
       else
         values = DB.query_first_row(SPEC_ID_FROM_PLAN_SQL, plan_spec_id)
         values[0].to_i if values
@@ -458,6 +488,8 @@ class AquaLotBuilder
 
   def okato
     DB.query_value(OKATO_SQL, plan_spec_id)
+  rescue NoMethodError
+    fail 'Не указаны адреса поставки'
   end
 
   PLAN_SPEC_AMOUNTS_SQL = <<-sql

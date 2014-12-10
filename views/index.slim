@@ -17,19 +17,43 @@ div ng-controller="LotsController as lots"
       | {{lots.lastSyncTime | date:'dd.MM.yyyy в HH:mm'}}
     | )
   table
-    tr
-      th Спецификация / ЗЗЦ
-      th title="Первая попытка передачи" style="width: 110px;" Время
-      th Ошибка
-    tr ng-repeat="lot in lots.pending"
-      td
-        a> href="http://ksazd.rao-esv.ru/plan_spec_history/{{lot.planSpecGuid}}"
-          | {{lot.planSpecGuid}}
-        | {{lot.specGuid ? (' ' + lot.specGuid) : ''}}
-      td: time
-        | {{lot.time | date:'dd.MM.yyyy HH:mm'}}
-      td
-        | {{lot.message}}
+    thead
+      tr
+        th Год
+        th Заказчик
+        th Спецификация
+      tr
+        th Направление
+        th Наименование 
+        th ЗЗЦ
+      tr
+        th Номер лота
+        th Ошибка
+        th title="Первая попытка передачи" style="width: 110px;" Время
+    tbody
+      tr ng-repeat-start="lot in lots.pending" ng-class-even="'even'"
+        td
+          | {{lot.gkpzYear}}
+        td
+          | {{lot.department}}
+        td
+          a> href="http://ksazd.rao-esv.ru/plan_spec_history/{{lot.planSpecGuid}}"
+            | {{lot.planSpecGuid}}
+      tr ng-class-even="'even'"
+        td
+          | {{lot.direction}}
+        td
+          | {{lot.specName}}
+        td
+          a> href="http://ksazd.rao-esv.ru/tenders/{{lot.tenderId}}"
+            | {{lot.specGuid}}
+      tr ng-repeat-end="" ng-class-even="'even'"
+        td
+          | {{lot.lotNum}}
+        td
+          | {{lot.message}}
+        td: time
+          | {{lot.time | date:'dd.MM.yyyy HH:mm'}}
 h1 История
 #legend
   span> style="color: #36C293;" &mdash; Всего

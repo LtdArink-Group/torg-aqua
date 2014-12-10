@@ -7,27 +7,6 @@ class Delivery < Model
     ERROR   = 'E'
   end
 
-  ERROR_SQL = <<-sql
-    with successfull as
-      (select nvl(max(attempted_at), date '2000-01-01') as last_date
-        from #{table}
-        where state = 'S'
-        and aqua_lot_id = :id)
-    select min(attempted_at),
-           max(d.message) keep (dense_rank last order by attempted_at)
-      from deliveries d,
-           successfull s
-      where d.state = 'E'
-        and d.aqua_lot_id = :id
-        and d.attempted_at > s.last_date
-      group by d.aqua_lot_id
-  sql
-
-  def self.first_failed(id)
-    values = DB.query_first_row(ERROR_SQL, id, id)
-    values ? new(*values) : new(Time.parse('2000-01-01'), '')
-  end
-
   ALL_SQL = <<-sql
     select trunc(attempted_at) as "date", count(distinct aqua_lot_id) value
       from #{table}
