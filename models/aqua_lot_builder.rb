@@ -358,6 +358,9 @@ class AquaLotBuilder
     spec.cost.tap do |cost|
       fail 'Цена лота без НДС равна нулю.' if cost == 0
       fail 'Цена лота без НДС больше цены лота с НДС.' if cost > spec.cost_nds
+      if spec.cost_nds / cost > 2
+        fail 'Цена лота без НДС меньше цены лота с НДС более чем в два раза.'
+      end
     end
   end
 
@@ -372,6 +375,9 @@ class AquaLotBuilder
       fail 'Плановая цена лота без НДС равна нулю.' if cost == 0
       if cost > plan_spec.cost_nds
         fail 'Плановая цена лота без НДС больше плановой цены лота с НДС.'
+      end
+      if spec.cost_nds / cost > 2
+        fail 'Плановая цена лота без НДС меньше плановой цены лота с НДС более чем в два раза.'
       end
     end
   end
