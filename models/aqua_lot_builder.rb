@@ -219,11 +219,11 @@ class AquaLotBuilder
   end
 
   def cost_nds
-    spec_guid && spec_id ? spec.cost_nds : (plan_spec.cost_nds - framed_cost_nds)
+    spec_guid && spec_id ? spec_cost_nds : (plan_spec_cost_nds - framed_cost_nds)
   end
 
   def cost
-    spec_guid && spec_id ? spec.cost : (plan_spec.cost - framed_cost)
+    spec_guid && spec_id ? spec_cost : (plan_spec_cost - framed_cost)
   end
 
   def zkurator
@@ -346,6 +346,34 @@ class AquaLotBuilder
   def spec_deleted?
     spec_id # need to check for deleted specs
     @spec_deleted
+  end
+
+  def spec_cost_nds
+    spec.cost_nds.tap do |cost|
+      fail 'Цена лота с НДС равна нулю.' if cost == 0
+    end
+  end
+
+  def spec_cost
+    spec.cost.tap do |cost|
+      fail 'Цена лота без НДС равна нулю.' if cost == 0
+      fail 'Цена лота без НДС больше цены лота с НДС.' if cost > spec.cost_nds
+    end
+  end
+
+  def plan_spec_cost_nds
+    plan_spec.cost_nds.tap do |cost|
+      fail 'Плановая цена лота с НДС равна нулю.' if cost == 0
+    end
+  end
+
+  def plan_spec_cost
+    plan_spec.cost.tap do |cost|
+      fail 'Плановая цена лота без НДС равна нулю.' if cost == 0
+      if cost > plan_spec.cost_nds
+        fail 'Плановая цена лота без НДС больше плановой цены лота с НДС.'
+      end
+    end
   end
 
   def fix_amounts?

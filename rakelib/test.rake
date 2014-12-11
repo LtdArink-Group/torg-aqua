@@ -2,8 +2,8 @@ require 'awesome_print'
 require 'pry'
 require 'pp'
 
-PLAN_SPEC_GUID = ['26DDA548E88C584E58AD5C794F82ACD4'].pack('H*')
-SPEC_GUID = ['67BB421E2E1843109B8A797F84ACCA1C'].pack('H*')
+PLAN_SPEC_GUID = ['817D0CA19E834450D5C48CF76ED99DC9'].pack('H*')
+SPEC_GUID = ['05CED990CADD46FF95B0A3D563BB41A2'].pack('H*')
 
 namespace :test do
   task :guid do
