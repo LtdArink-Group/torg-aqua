@@ -4,16 +4,26 @@ require 'config/configuration'
 class DB
   class << self
     def query_value(query, *args)
-      exec(query, *args).fetch[0]
+      cursor = exec(query, *args)
+      val = cursor.fetch[0]
+      cursor.close
+      val
     end
 
     def query_first_row(query, *args)
-      exec(query, *args).fetch
+      cursor = exec(query, *args)
+      val = cursor.fetch
+      cursor.close
+      val
     end
 
     def query_all(query, *args)
       [].tap do |a|
-        exec(query, *args) { |r| a << r }
+        cursor = exec(query, *args)
+        while r = cursor.fetch
+          a << r
+        end
+        cursor.close
       end
     end
 
