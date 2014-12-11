@@ -376,7 +376,7 @@ class AquaLotBuilder
       if cost > plan_spec.cost_nds
         fail 'Плановая цена лота без НДС больше плановой цены лота с НДС.'
       end
-      if spec.cost_nds / cost > 2
+      if plan_spec.cost_nds / cost > 2
         fail 'Плановая цена лота без НДС меньше плановой цены лота с НДС более чем в два раза.'
       end
     end
