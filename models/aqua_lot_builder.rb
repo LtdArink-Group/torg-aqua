@@ -75,9 +75,9 @@ class AquaLotBuilder
       # Способ закупки (ЕИ по итогам конкурентных процедур)
       'SPZEI' => lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
       # Планируемая цена лота (руб. с НДС)
-      'SUMN' => format_cost(cost_nds),
+      'SUMN' => format_cost(cost_nds * qty),
       # Планируемая цена лота (руб. без  НДС)
-      'SUM_' => format_cost(cost),
+      'SUM_' => format_cost(cost * qty),
       # Документ, на основании которого определена планируемая цена
       'DOCTYPE' => CostDocument.lookup(plan_spec.cost_doc),
       # Дата объявления конкурсных процедур. План
