@@ -340,6 +340,7 @@ class AquaLotBuilder
     @plan_spec_amounts ||= plan_spec_amounts_from_db.tap do |a|
       (5 - a.size).times { a << Array.new(3, ZERO) }
       a[0] = [cost_nds, cost, cost_nds] if fix_amounts?
+      (1..5).each { |i| a[i] = Array.new(3, ZERO) } if fix_zzc?
     end
   end
 
@@ -384,6 +385,10 @@ class AquaLotBuilder
 
   def fix_amounts?
     [TENDER_TYPE_ZZC, TENDER_TYPE_ORK].include? tender.tender_type_id
+  end
+
+  def fix_zzc?
+    tender.tender_type_id == TENDER_TYPE_ZZC
   end
 
   def format_date(time)
