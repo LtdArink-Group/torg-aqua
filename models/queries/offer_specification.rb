@@ -8,6 +8,7 @@ class Query::OfferSpecification < Query::Base
            ksazd.plan_lots pl,
            ksazd.plan_specifications ps,
            directions d,
+           departments dp,
            --
            ksazd.specifications s,
            ksazd.offer_specifications os
@@ -16,6 +17,7 @@ class Query::OfferSpecification < Query::Base
         and p.id = pl.protocol_id
         and pl.id = ps.plan_lot_id
         and ps.direction_id = d.ksazd_id
+        and pl.root_customer_id = dp.ksazd_id
         --
         and ps.id = s.plan_specification_id
         and s.id = os.specification_id

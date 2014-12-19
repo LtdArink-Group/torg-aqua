@@ -8,6 +8,7 @@ class Query::WinnerProtocolFramed < Query::Base
            ksazd.plan_lots pl,
            ksazd.plan_specifications ps,
            directions d,
+           departments dp,
            --
            ksazd.specifications fs,
            ksazd.specifications s,
@@ -18,6 +19,7 @@ class Query::WinnerProtocolFramed < Query::Base
         and p.id = pl.protocol_id
         and pl.id = ps.plan_lot_id
         and ps.direction_id = d.ksazd_id
+        and pl.root_customer_id = dp.ksazd_id
         --
         and ps.id = fs.plan_specification_id
         and fs.id = s.frame_id

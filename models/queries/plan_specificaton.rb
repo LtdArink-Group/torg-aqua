@@ -7,12 +7,14 @@ class Query::PlanSpecification < Query::Base
            ksazd.commissions c,
            ksazd.plan_lots pl,
            ksazd.plan_specifications ps,
-           directions d
+           directions d,
+           departments dp
       where p.commission_id = c.id
         and c.commission_type_id in (#{commission_types})
         and p.id = pl.protocol_id
         and pl.id = ps.plan_lot_id
         and ps.direction_id = d.ksazd_id
+        and pl.root_customer_id = dp.ksazd_id
         --
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
