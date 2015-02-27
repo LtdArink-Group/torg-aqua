@@ -193,7 +193,7 @@ class AquaLotBuilder
   def invest_project
     invest_project_name_id =
       InvestProject.find(plan_spec.invest_project_id).invest_project_name_id
-    InvestProjectName.lookup(invest_project_name_id) || fail "Не удалось найти проект АКВА для id #{plan_spec.invest_project_id}"
+    InvestProjectName.lookup(invest_project_name_id) || fail("Не удалось найти проект АКВА для id #{plan_spec.invest_project_id}")
   end
 
   def lotstatus
