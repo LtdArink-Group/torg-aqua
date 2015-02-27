@@ -22,6 +22,6 @@ class SoapClient
     options = {}.tap do |o|
       o.merge! proxy: Configuration.soap.proxy if Configuration.soap['proxy']
     end
-    options.merge(wsdl: wsdl, basic_auth: [login, password])
+    options.merge(wsdl: wsdl, basic_auth: [login, password], ssl_verify_mode: :none)
   end
 end
