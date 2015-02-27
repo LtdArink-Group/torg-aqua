@@ -121,6 +121,10 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 	<wsdl:message name="ZPPM_PROJ_UPLOADResponse">
 		<wsdl:part name="parameter" element="tns:ZPPM_PROJ_UPLOADResponse" /></wsdl:message>
 	<wsdl:portType name="ZPPM_PROJC_UPLOAD">
+		<wsdl:documentation>
+			<sapdoc:sapdoc xmlns:sapdoc="urn:sap:esi:documentation">
+				<sapdoc:docitem docURL="http://sr-vm-252.corp.gidroogk.com:8000/sap/bc/esdt/docu/sd_text?sap-client=400&amp;sd_name=ZPPM_PROJC_UPLOAD" /></sapdoc:sapdoc>
+		</wsdl:documentation>
 		<wsdl:operation name="ZPPM_PROJ_UPLOAD">
 			<wsdl:input message="tns:ZPPM_PROJ_UPLOAD" />
 			<wsdl:output message="tns:ZPPM_PROJ_UPLOADResponse" /></wsdl:operation>
@@ -128,7 +132,7 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 	<wsdl:binding name="BN1" type="tns:ZPPM_PROJC_UPLOAD">
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
 		<wsdl:operation name="ZPPM_PROJ_UPLOAD">
-			<soap:operation style="document" />
+			<soap:operation soapAction="urn:sap-com:document:sap:rfc:functions:ZPPM_PROJC_UPLOAD:ZPPM_PROJ_UPLOADRequest" style="document" />
 			<wsdl:input>
 				<soap:body use="literal" />
 			</wsdl:input>
@@ -137,10 +141,10 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 			</wsdl:output>
 		</wsdl:operation>
 	</wsdl:binding>
-	<wsdl:binding name="BN1_SOAP12" type="tns:ZPPM_PROJC_UPLOAD">
+	<wsdl:binding name="BN1_soap12" type="tns:ZPPM_PROJC_UPLOAD">
 		<wsoap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
 		<wsdl:operation name="ZPPM_PROJ_UPLOAD">
-			<wsoap12:operation style="document" />
+			<wsoap12:operation soapAction="urn:sap-com:document:sap:rfc:functions:ZPPM_PROJC_UPLOAD:ZPPM_PROJ_UPLOADRequest" style="document" />
 			<wsdl:input>
 				<wsoap12:body use="literal" />
 			</wsdl:input>
@@ -151,10 +155,10 @@ xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xm
 	</wsdl:binding>
 	<wsdl:service name="ZPPM_PROJC_UPLOAD">
 		<wsdl:port name="BN1" binding="tns:BN1">
-			<soap:address location="http://akva.gidroogk.com:8090/er3/sap/bc/srt/rfc/sap/zppm_projc_upload/400/zppm_projc_upload/bn1" />
+			<soap:address location="https://er3.gidroogk.com:8090/er3/sap/bc/srt/rfc/sap/zppm_projc_upload/400/zppm_projc_upload/bn1" />
 		</wsdl:port>
-		<wsdl:port name="BN1_SOAP12" binding="tns:BN1_SOAP12">
-			<wsoap12:address location="http://akva.gidroogk.com:8090/er3/sap/bc/srt/rfc/sap/zppm_projc_upload/400/zppm_projc_upload/bn1" />
+		<wsdl:port name="BN1_soap12" binding="tns:BN1_soap12">
+			<wsoap12:address location="https://er3.gidroogk.com:8090/er3/sap/bc/srt/rfc/sap/zppm_projc_upload/400/zppm_projc_upload/bn1" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
