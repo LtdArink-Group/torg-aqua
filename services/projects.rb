@@ -58,11 +58,12 @@ class Projects
   end
 
   def yesterday
-    format_date(Date.today - 1)
+    format_date(Date.today)
   end
 
   def process(projects)
     logger.info "  Получено проектов: #{projects.size}"
+    logger.info projects
     projects = projects.select { |p| p[:spp_parent].nil? }
     merge(projects) unless projects.empty?
   end

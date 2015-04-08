@@ -41,6 +41,9 @@ class DB
       @connection ||= OCI8.new(Configuration.database.login,
                                Configuration.database.password,
                                Configuration.database.tns)
+
+      @connection.exec("ALTER SESSION SET TIME_ZONE = '+00:00'")
+      @connection
     end
 
     def log(statement)

@@ -6,15 +6,15 @@ require 'base64'
 class AquaLotBuilder
   ZERO = BigDecimal.new('0')
   # ИС КСАЗД
-  FUTURE_PLAN_EI   = 31003 # Заключить договор с единственным поставщиком
-  CONTRACT_DONE    = 33100 # Договор заключен
-  FRUSTRATED       = 33110 # Признана несостоявшейся
+  SOLUTION_TYPE_EI = 40_002 # Заключить договор с единственным поставщиком
+  CONTRACT_DONE    = 33_100 # Договор заключен
+  FRUSTRATED       = 33_110 # Признана несостоявшейся
   STATE_PLANNED    = 1     # План (не Внеплан)
   ADDITIONAL_RATIO = 0.2   # Дозакупка >< 20%
-  CANCELLED        = 15004 # Отменен
-  EXCLUDED         = 15007 # Исключен СД
-  TENDER_TYPE_ZZC  = 10014 # Закрытый запрос цен
-  TENDER_TYPE_ORK  = 10018 # Открытый рамочный конкурс
+  CANCELLED        = 15_004 # Отменен
+  EXCLUDED         = 15_007 # Исключен СД
+  TENDER_TYPE_ZZC  = 10_014 # Закрытый запрос цен
+  TENDER_TYPE_ORK  = 10_018 # Открытый рамочный конкурс
   # ИС АКВа
   STATE_PLAN            = 'P'  # Плановая закупка
   STATE_UNPLAN          = 'V'  # Внеплановая закупка
@@ -73,7 +73,7 @@ class AquaLotBuilder
       # Способ закупки (по способу объявления)
       'SPZKF' => TenderType.lookup(tender.tender_type_id) || '',
       # Способ закупки (ЕИ по итогам конкурентных процедур)
-      'SPZEI' => lot.future_plan_id == FUTURE_PLAN_EI ? AQUA_EI : '',
+      'SPZEI' => winner_protocol_lot.solution_type_id == SOLUTION_TYPE_EI ? AQUA_EI : '',
       # Планируемая цена лота (руб. с НДС)
       'SUMN' => format_cost(cost_nds * qty),
       # Планируемая цена лота (руб. без  НДС)
@@ -186,14 +186,14 @@ class AquaLotBuilder
   def customer
     ksazd_id = plan_spec.customer_id
     root_id = Department.root(ksazd_id)
-    Department.lookup(root_id) or
-      fail "Не удалось найти заказчика АКВА для id #{ksazd_id}"
+    Department.lookup(root_id) || fail("Не удалось найти заказчика АКВА для id #{ksazd_id}")
   end
 
   def invest_project
     invest_project_name_id =
       InvestProject.find(plan_spec.invest_project_id).invest_project_name_id
-    InvestProjectName.lookup(invest_project_name_id) || fail("Не удалось найти проект АКВА для id #{plan_spec.invest_project_id}")
+    InvestProjectName.lookup(invest_project_name_id) ||
+      fail("Не удалось найти проект АКВА для id #{plan_spec.invest_project_id}")
   end
 
   def lotstatus
@@ -228,8 +228,7 @@ class AquaLotBuilder
 
   def zkurator
     ksazd_id = plan_spec.monitor_service_id
-    value = MonitorService.lookup(ksazd_id) or
-      fail "Не удалось найти подразделение-куратор АКВА для id #{ksazd_id}"
+    value = MonitorService.lookup(ksazd_id) || fail("Не удалось найти подразделение-куратор АКВА для id #{ksazd_id}")
     sprintf('%03d', value)
   end
 
@@ -249,13 +248,8 @@ class AquaLotBuilder
 
   def prn1
     [].tap do |a|
-      reason = lot.non_public_reason ? lot.non_public_reason.read : ''
-      unless reason.empty?
-        a << reason
-      end
-      if id = plan_lot.protocol_id
-        a << Protocol.find(id).details
-      end
+      a << lot.non_public_reason.read if lot.non_public_reason
+      a << Protocol.find(plan_lot.protocol_id).details if plan_lot.protocol_id
     end.join ' / '
   end
 
@@ -264,9 +258,7 @@ class AquaLotBuilder
   end
 
   def etp_num
-    if tender.etp_num && tender.etp_num > 99_999_999
-      fail 'Номер процедуры на ЭТП больше 8-и символов' 
-    end
+    fail 'Номер процедуры на ЭТП больше 8-и символов' if tender.etp_num && tender.etp_num > 99_999_999
     tender.etp_num
   end
 
@@ -302,6 +294,11 @@ class AquaLotBuilder
   def winner_protocol
     return NullWinnerProtocol.new unless spec_id
     WinnerProtocol.find(lot.winner_protocol_id) || NullWinnerProtocol.new
+  end
+
+  def winner_protocol_lot
+    return NullWinnerProtocolLot.new unless spec_id
+    WinnerProtocolLot.find(lot.winner_protocol_id, lot.id) || NullWinnerProtocolLot.new
   end
 
   def contract
@@ -392,7 +389,7 @@ class AquaLotBuilder
   end
 
   def format_date(time)
-    time ? time.to_date : ''
+    time ? time.getlocal.to_date : ''
   end
 
   def format_guid(guid)
@@ -528,7 +525,7 @@ class AquaLotBuilder
   def okato
     DB.query_value(OKATO_SQL, plan_spec_id)
   rescue NoMethodError
-    fail 'Не указаны адреса поставки'
+    raise 'Не указаны адреса поставки'
   end
 
   PLAN_SPEC_AMOUNTS_SQL = <<-sql
@@ -564,9 +561,9 @@ class AquaLotBuilder
 
   def framed_costs
     @framed_costs ||= if spec_id
-      DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
-    else
-      Array.new(2)
-    end
+                        DB.query_first_row(FRAMED_COSTS_SQL, spec_id)
+                      else
+                        Array.new(2)
+                      end
   end
 end
