@@ -79,7 +79,6 @@ class NewLots
   def build_data(lot)
     lot_builder = AquaLotBuilder.new(lot.plan_spec_guid, lot.spec_guid)
     return false unless data = get_lot_data(lot_builder, lot)
-    return false unless data['ZZCUSTOMER_ID'] == 4010
     contractors = ContractorsListBuilder.new(lot_builder).contractors
     data['UCH_KSDAZD_TAB'] = { 'item' => contractors.values }
     { 'I_LOTS' => { 'item' => data } }

@@ -416,7 +416,7 @@ class AquaLotBuilder
     end
   end
 
-  PLAN_SPEC_SQL = <<-sql
+  PLAN_SPEC_SQL = <<-SQL
     select max(ps.id)
       from ksazd.protocols p,
            ksazd.commissions c,
@@ -430,29 +430,29 @@ class AquaLotBuilder
         and pl.status_id in (#{plan_statuses})
         and ps.guid = hextoraw(:guid)
       group by ps.guid
-  sql
+  SQL
 
   def plan_spec_id
     @plan_spec_id ||= DB.query_value(PLAN_SPEC_SQL, DB.guid(plan_spec_guid)).to_i
   end
 
-  SPEC_ID_FROM_PLAN_SQL = <<-sql
-    select s.id
-      from ksazd.specifications s,
-           ksazd.lots l
-      where s.lot_id = l.id
-        and l.next_id is null
-        and s.plan_specification_id = :plan_spec_id
-  sql
+  SPEC_ID_FROM_PLAN_SQL = <<-SQL
+    select max(s.id)
+      from ksazd.specifications s
+        inner join ksazd.lots l on (s.lot_id = l.id and l.next_id is null)
+        inner join ksazd.plan_specifications ps on (ps.id = s.plan_specification_id)
+      where ps.guid = hextoraw(:guid)
+      having max(s.id) is not null
+  SQL
 
-  SPEC_ID_SQL = <<-sql
+  SPEC_ID_SQL = <<-SQL
     select s.id
       from ksazd.specifications s,
            ksazd.lots l
       where s.lot_id = l.id
         and l.next_id is null
         and s.guid = hextoraw(:guid)
-  sql
+  SQL
 
   def spec_id
     @spec_id ||=
@@ -464,25 +464,25 @@ class AquaLotBuilder
           nil
         end
       else
-        values = DB.query_first_row(SPEC_ID_FROM_PLAN_SQL, plan_spec_id)
+        values = DB.query_first_row(SPEC_ID_FROM_PLAN_SQL, DB.guid(plan_spec_guid))
         values[0].to_i if values
       end
   end
 
-  MAIN_LOT_COST_SQL = <<-sql
+  MAIN_LOT_COST_SQL = <<-SQL
     select sum(s.cost_nds * s.qty)
       from ksazd.plan_specifications s,
            ksazd.plan_lots l
       where s.plan_lot_id = l.id
         and l.guid = hextoraw(:guid)
         and l.version = 0
-  sql
+  SQL
 
   def main_lot_cost
     DB.query_value(MAIN_LOT_COST_SQL, DB.guid(plan_lot.additional_to))
   end
 
-  ADDITIONAL_COST_SUM_SQL = <<-sql
+  ADDITIONAL_COST_SUM_SQL = <<-SQL
     select sum(s.cost_nds * s.qty)
       from ksazd.plan_specifications s,
            ksazd.plan_lots l
@@ -490,21 +490,21 @@ class AquaLotBuilder
         and l.additional_to = hextoraw(:guid)
         and l.additional_num <= :num
         and l.version = 0
-  sql
+  SQL
 
   def additional_cost_sum
     DB.query_value(ADDITIONAL_COST_SUM_SQL, DB.guid(plan_lot.additional_to),
                    plan_lot.additional_num)
   end
 
-  ADDITIONAL_TO_SQL = <<-sql
+  ADDITIONAL_TO_SQL = <<-SQL
     select distinct s.guid
       from ksazd.plan_specifications s,
            ksazd.plan_lots l
       where s.plan_lot_id = l.id
         and s.direction_id = :direction_id
         and l.guid = hextoraw(:guid)
-  sql
+  SQL
 
   def additional_to
     return '' unless plan_lot.additional_to
@@ -512,7 +512,7 @@ class AquaLotBuilder
     DB.query_value(ADDITIONAL_TO_SQL, plan_spec.direction_id, guid)
   end
 
-  OKATO_SQL = <<-sql
+  OKATO_SQL = <<-SQL
     select nvl(h.okato, a.okato)
       from ksazd.fias_plan_specifications s,
            ksazd.fias_houses h,
@@ -520,7 +520,7 @@ class AquaLotBuilder
       where s.houseid = h.houseid(+)
         and s.addr_aoid = a.aoid
         and s.plan_specification_id = :id
-  sql
+  SQL
 
   def okato
     DB.query_value(OKATO_SQL, plan_spec_id)
@@ -528,14 +528,14 @@ class AquaLotBuilder
     raise 'Не указаны адреса поставки'
   end
 
-  PLAN_SPEC_AMOUNTS_SQL = <<-sql
+  PLAN_SPEC_AMOUNTS_SQL = <<-SQL
     select nvl(a.amount_finance_nds, 0),
            nvl(a.amount_mastery, 0),
            nvl(a.amount_mastery_nds, 0)
       from ksazd.plan_spec_amounts a
       where a.plan_specification_id = :id
       order by a.year
-  sql
+  SQL
 
   def plan_spec_amounts_from_db
     DB.query_all(PLAN_SPEC_AMOUNTS_SQL, plan_spec_id)
@@ -549,7 +549,7 @@ class AquaLotBuilder
     framed_costs[1] || 0
   end
 
-  FRAMED_COSTS_SQL = <<-sql
+  FRAMED_COSTS_SQL = <<-SQL
     select sum(s.cost_nds), sum(s.cost)
       from ksazd.specifications s,
            ksazd.lots l
@@ -557,7 +557,7 @@ class AquaLotBuilder
         and l.next_id is null
         and s.frame_id = :spec_id
         and l.status_id != #{FRUSTRATED}
-  sql
+  SQL
 
   def framed_costs
     @framed_costs ||= if spec_id

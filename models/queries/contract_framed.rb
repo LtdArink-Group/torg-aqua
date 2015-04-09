@@ -1,7 +1,7 @@
 require 'db/query'
 
 class Query::ContractFramed < Query::Base
-  CHANGED_DATA_SQL = <<-sql
+  CHANGED_DATA_SQL = <<-SQL
     select ps.guid, s.guid, max(ct.updated_at)
       from ksazd.protocols p,
            ksazd.commissions c,
@@ -29,8 +29,9 @@ class Query::ContractFramed < Query::Base
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and ct.updated_at > :max_time
+        and l.root_customer_id = 2
       group by ps.guid, s.guid
-  sql
+  SQL
 
   private
 

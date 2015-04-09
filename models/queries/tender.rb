@@ -1,7 +1,7 @@
 require 'db/query'
 
 class Query::Tender < Query::Base
-  CHANGED_DATA_SQL = <<-sql
+  CHANGED_DATA_SQL = <<-SQL
     select ps.guid, null, max(t.updated_at)
       from ksazd.protocols p,
            ksazd.commissions c,
@@ -27,8 +27,9 @@ class Query::Tender < Query::Base
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and t.updated_at > :max_time
+        and l.root_customer_id = 2
       group by ps.guid
-  sql
+  SQL
 
   private
 

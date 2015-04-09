@@ -10,11 +10,11 @@ class AquaLot < Model
               :gkpz_year, :department, :direction, :lot_num, :spec_name,
               :tender_id
 
-  PENDING_SQL = <<-sql
+  PENDING_SQL = <<-SQL
     select al.plan_spec_guid, al.spec_guid, al.id
       from #{table} al
       where al.state = '#{State::PENDING}'
-  sql
+  SQL
 
   def self.pending
     DB.query_all(PENDING_SQL).map { |values| AquaLot.new(*values) }
@@ -28,7 +28,7 @@ class AquaLot < Model
     Configuration.integration.lot.plan_statuses.join(',')
   end
 
-  PENDING_WITH_INFO_SQL = <<-sql
+  PENDING_WITH_INFO_SQL = <<-SQL
     with
       successfull as
       (select al.id, nvl(max(d.attempted_at), date '2000-01-01') as last_date
@@ -88,7 +88,7 @@ class AquaLot < Model
         and al.state = '#{State::PENDING}'
         and d.attempted_at > s.last_date
       group by al.plan_spec_guid, al.spec_guid, al.id
-  sql
+  SQL
 
   def self.pending_with_info
     DB.query_all(PENDING_WITH_INFO_SQL).map { |values| AquaLot.new(*values) }
@@ -133,7 +133,7 @@ class AquaLot < Model
     end
   end
 
-  MERGE_ZZC_SQL = <<-sql
+  MERGE_ZZC_SQL = <<-SQL
     merge into #{table} t using
     (select hextoraw(:guid1) plan_spec_guid,
             hextoraw(:guid2) spec_guid
@@ -146,14 +146,14 @@ class AquaLot < Model
       insert (id, plan_spec_guid, spec_guid, state)
       values (#{table}_seq.nextval, s.plan_spec_guid,
               s.spec_guid, :state)
-  sql
+  SQL
 
   def merge_zzc(state)
     DB.exec(MERGE_ZZC_SQL, DB.guid(plan_spec_guid), DB.guid(spec_guid), state, state)
     DB.commit
   end
 
-  MERGE_SQL = <<-sql
+  MERGE_SQL = <<-SQL
     merge into #{table} t using
     (select hextoraw(:guid) plan_spec_guid from dual) s
     on (t.plan_spec_guid = s.plan_spec_guid and t.spec_guid is null)
@@ -162,7 +162,7 @@ class AquaLot < Model
     when not matched then
       insert (id, plan_spec_guid, state)
       values (#{table}_seq.nextval, s.plan_spec_guid, :state)
-  sql
+  SQL
 
   def merge(state)
     DB.exec(MERGE_SQL, DB.guid(plan_spec_guid), state, state)

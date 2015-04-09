@@ -1,34 +1,23 @@
 require 'db/query'
 
 class Query::Contract < Query::Base
-  CHANGED_DATA_SQL = <<-sql
+  CHANGED_DATA_SQL = <<-SQL
     select ps.guid, null, max(ct.updated_at)
-      from ksazd.protocols p,
-           ksazd.commissions c,
-           ksazd.plan_lots pl,
-           ksazd.plan_specifications ps,
-           directions d,
-           departments dp,
-           --
-           ksazd.specifications s,
-           ksazd.lots l,
-           ksazd.contracts ct
-      where p.commission_id = c.id
-        and c.commission_type_id in (#{commission_types})
-        and p.id = pl.protocol_id
-        and pl.id = ps.plan_lot_id
-        and ps.direction_id = d.ksazd_id
-        and pl.root_customer_id = dp.ksazd_id
-        --
-        and ps.id = s.plan_specification_id
-        and s.lot_id = l.id
-        and l.id = ct.lot_id
-        --
-        and pl.status_id in (#{plan_statuses})
+      from ksazd.protocols p
+        inner join ksazd.commissions c on (p.commission_id = c.id and c.commission_type_id in (#{commission_types}))
+        inner join ksazd.plan_lots pl on (p.id = pl.protocol_id)
+        inner join ksazd.plan_specifications ps on (pl.id = ps.plan_lot_id)
+        inner join directions d on (ps.direction_id = d.ksazd_id)
+        inner join departments dp on (pl.root_customer_id = dp.ksazd_id)
+        inner join ksazd.specifications s on (ps.id = s.plan_specification_id)
+        inner join ksazd.lots l on (s.lot_id = l.id)
+        inner join ksazd.contracts ct on (l.id = ct.lot_id)
+      where pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and ct.updated_at > :max_time
+        and l.root_customer_id = 2
       group by ps.guid
-  sql
+  SQL
 
   private
 

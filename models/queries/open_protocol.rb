@@ -1,7 +1,7 @@
 require 'db/query'
 
 class Query::OpenProtocol < Query::Base
-  CHANGED_DATA_SQL = <<-sql
+  CHANGED_DATA_SQL = <<-SQL
     select ps.guid, null, max(op.updated_at)
       from ksazd.protocols p,
            ksazd.commissions c,
@@ -29,8 +29,9 @@ class Query::OpenProtocol < Query::Base
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and op.updated_at > :max_time
+        and l.root_customer_id = 2
       group by ps.guid
-  sql
+  SQL
 
   private
 
