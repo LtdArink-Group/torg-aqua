@@ -208,7 +208,7 @@ class AquaLotBuilder
     if spec_deleted?
       'X'
     else
-      [CANCELLED, EXCLUDED].include?(plan_lot.state) ? 'X' : ''
+      [CANCELLED, EXCLUDED].include?(plan_lot.status_id) ? 'X' : ''
     end
   end
 
