@@ -12,7 +12,7 @@ class Query::PlanLot < Query::Base
       where pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and pl.updated_at > :max_time
-        and pl.root_customer_id = 2
+        and pl.root_customer_id in (2,8)
       group by ps.guid
   SQL
 

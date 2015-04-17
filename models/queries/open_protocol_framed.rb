@@ -31,7 +31,7 @@ class Query::OpenProtocolFramed < Query::Base
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and op.updated_at > :max_time
-        and l.root_customer_id = 2
+        and l.root_customer_id in (2,8)
       group by ps.guid, s.guid
   SQL
 

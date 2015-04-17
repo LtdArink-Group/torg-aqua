@@ -2,7 +2,7 @@ require 'awesome_print'
 require 'pry'
 require 'pp'
 
-PLAN_SPEC_GUID = ['89430dac59a80d588b8db329ec1e6ddd'].pack('H*')
+PLAN_SPEC_GUID = ['00a860ac7faa6eecd98a5f995afc8340'].pack('H*')
 SPEC_GUID = nil#['02BE5258618043969218130041E7E845'].pack('H*')
 
 namespace :test do
