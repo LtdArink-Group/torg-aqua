@@ -17,7 +17,7 @@ class Query::WinnerProtocolLot < Query::Base
     where pl.status_id in (#{plan_statuses})
       and pl.gkpz_year >= #{START_YEAR}
       and wpl.updated_at > :max_time
-      and l.root_customer_id in (2,8)
+      and l.root_customer_id in (2, 3, 4, 5, 6, 7, 8, 9, 701000, 702000, 801000, 906000, 1000011)
     group by ps.guid
   SQL
 
