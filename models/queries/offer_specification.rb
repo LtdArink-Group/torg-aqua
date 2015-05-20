@@ -11,6 +11,8 @@ class Query::OfferSpecification < Query::Base
            departments dp,
            --
            ksazd.specifications s,
+           ksazd.lots l,
+           ksazd.tenders t,
            ksazd.offer_specifications os
       where p.commission_id = c.id
         and c.commission_type_id in (#{commission_types})
@@ -21,11 +23,14 @@ class Query::OfferSpecification < Query::Base
         --
         and ps.id = s.plan_specification_id
         and s.id = os.specification_id
+        and s.lot_id = l.id
+        and l.tender_id = t.id
         --
+        and t.tender_type_id not in (#{excluded_tender_types})
         and pl.status_id in (#{plan_statuses})
-        and pl.gkpz_year >= #{START_YEAR}
+        and l.gkpz_year >= #{START_YEAR}
         and os.updated_at > :max_time
-        and pl.root_customer_id in (2, 3, 4, 5, 6, 7, 8, 9, 701000, 702000, 801000, 906000, 1000011)
+        and l.root_customer_id in (2, 3, 4, 5, 6, 7, 8, 9, 701000, 702000, 801000, 906000, 1000011)
       group by ps.guid
   SQL
 

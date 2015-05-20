@@ -12,6 +12,7 @@ class Query::WinnerProtocol < Query::Base
            --
            ksazd.specifications s,
            ksazd.lots l,
+           ksazd.tenders t,
            ksazd.winner_protocols wp
       where p.commission_id = c.id
         and c.commission_type_id in (#{commission_types})
@@ -22,8 +23,10 @@ class Query::WinnerProtocol < Query::Base
         --
         and ps.id = s.plan_specification_id
         and s.lot_id = l.id
+        and l.tender_id = t.id
         and l.winner_protocol_id = wp.id
         --
+        and t.tender_type_id not in (#{excluded_tender_types})
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and wp.updated_at > :max_time

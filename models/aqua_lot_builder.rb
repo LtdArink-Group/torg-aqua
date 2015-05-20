@@ -219,11 +219,11 @@ class AquaLotBuilder
   end
 
   def cost_nds
-    spec_guid && spec_id ? spec_cost_nds : (plan_spec_cost_nds - framed_cost_nds)
+    spec_guid && spec_id ? spec_cost_nds : plan_spec_cost_nds
   end
 
   def cost
-    spec_guid && spec_id ? spec_cost : (plan_spec_cost - framed_cost)
+    spec_guid && spec_id ? spec_cost : plan_spec_cost
   end
 
   def zkurator
@@ -381,7 +381,7 @@ class AquaLotBuilder
   end
 
   def fix_amounts?
-    [TENDER_TYPE_ZZC, TENDER_TYPE_ORK].include? tender.tender_type_id
+    [TENDER_TYPE_ZZC].include? tender.tender_type_id
   end
 
   def fix_zzc?

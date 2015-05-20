@@ -26,6 +26,7 @@ class Query::OpenProtocol < Query::Base
         and l.tender_id = t.id
         and t.id = op.tender_id
         --
+        and t.tender_type_id not in (#{excluded_tender_types})
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and op.updated_at > :max_time

@@ -20,5 +20,7 @@ integration:
     start_time: 2013-01-01T00:00:00.0Z
     commission_types: [28004, 28005]
     plan_statuses: [15003, 15004, 15006, 15007]
+  tender:
+    excluded_tender_types: [10018, 10019]
   project:
     start_date: 2000-01-01
