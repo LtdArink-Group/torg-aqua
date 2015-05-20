@@ -16,6 +16,7 @@ class Query::PlanSpecification < Query::Base
         and ps.direction_id = d.ksazd_id
         and pl.root_customer_id = dp.ksazd_id
         --
+        and pl.tender_type_id not in (#{excluded_tender_types})
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and ps.updated_at > :max_time

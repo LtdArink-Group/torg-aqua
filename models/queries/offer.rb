@@ -12,6 +12,7 @@ class Query::Offer < Query::Base
            --
            ksazd.specifications s,
            ksazd.lots l,
+           ksazd.tenders t,
            ksazd.offers o
       where p.commission_id = c.id
         and c.commission_type_id in (#{commission_types})
@@ -23,7 +24,9 @@ class Query::Offer < Query::Base
         and ps.id = s.plan_specification_id
         and s.lot_id = l.id
         and l.id = o.lot_id
+        and l.tender_id = t.id
         --
+        and t.tender_type_id not in (#{excluded_tender_types})
         and pl.status_id in (#{plan_statuses})
         and pl.gkpz_year >= #{START_YEAR}
         and o.updated_at > :max_time

@@ -15,6 +15,7 @@ class Query::WinnerProtocolLot < Query::Base
       inner join ksazd.winner_protocols wp on (l.winner_protocol_id = wp.id)
       inner join ksazd.winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
     where pl.status_id in (#{plan_statuses})
+      and t.tender_type_id not in (#{excluded_tender_types})
       and pl.gkpz_year >= #{START_YEAR}
       and wpl.updated_at > :max_time
       and l.root_customer_id in (2, 3, 4, 5, 6, 7, 8, 9, 701000, 702000, 801000, 906000, 1000011)

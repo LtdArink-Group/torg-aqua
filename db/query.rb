@@ -25,6 +25,10 @@ module Query
       def plan_statuses
         Configuration.integration.lot.plan_statuses.join(',')
       end
+
+      def excluded_tender_types
+        Configuration.integration.tender.excluded_tender_types.join(',')
+      end
     end
 
     def initialize
