@@ -12,6 +12,7 @@ class Query::WinnerProtocolLot < Query::Base
       inner join departments dp on (pl.root_customer_id = dp.ksazd_id)
       inner join ksazd.specifications s on (ps.id = s.plan_specification_id)
       inner join ksazd.lots l on (s.lot_id = l.id)
+      inner join ksazd.tenders t on (t.id = l.tender_id)
       inner join ksazd.winner_protocols wp on (l.winner_protocol_id = wp.id)
       inner join ksazd.winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
     where pl.status_id in (#{plan_statuses})
